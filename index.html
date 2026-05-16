@@ -727,11 +727,16 @@ window.addEventListener('load', () => {
 
 function initSupabase(url, key) {
   try {
-    supabase = window.supabase.createClient(url, key);
+    supabase = window.supabase.createClient(url, key, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+      }
+    });
     document.getElementById('supabase-config').style.display = 'none';
     checkAuth();
   } catch(e) {
-    showToast('Ошибка подключения');
+    alert('Ошибка подключения: ' + e.message);
   }
 }
 
