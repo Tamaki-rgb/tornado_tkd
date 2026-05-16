@@ -680,7 +680,7 @@ create policy "auth_all" on payments for all using (auth.role()='authenticated')
 // ============================================================
 // STATE
 // ============================================================
-let supabase = null;
+let db = null;
 let currentUser = null;
 let userProfile = null;
 let groups = [];
@@ -727,7 +727,7 @@ window.addEventListener('load', () => {
 
 function initSupabase(url, key) {
   try {
-    supabase = window.supabase.createClient(url, key, {
+    db = window.supabase.createClient(url, key, {
       auth: {
         persistSession: true,
         autoRefreshToken: true,
@@ -757,7 +757,7 @@ function resetConfig() {
 }
 
 async function checkAuth() {
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await db.auth.getSession();
   if (session) {
     currentUser = session.user;
     await loadProfile();
@@ -767,7 +767,7 @@ async function checkAuth() {
 }
 
 async function loadProfile() {
-  const { data } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
+  const { data } = await db.from('profiles').select('*').eq('id', currentUser.id).single();
   if (data && data.first_name) {
     userProfile = data;
     showApp();
@@ -801,7 +801,7 @@ async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
   const pass = document.getElementById('login-pass').value;
   if (!email || !pass) { showToast('Заполните все поля'); return; }
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
+  const { data, error } = await db.auth.signInWithPassword({ email, password: pass });
   if (error) { showToast('Ошибка: ' + error.message); return; }
   currentUser = data.user;
   await loadProfile();
@@ -813,15 +813,15 @@ async function doRegister() {
   const email = document.getElementById('reg-email').value.trim();
   const pass = document.getElementById('reg-pass').value;
   if (!fname || !lname || !email || !pass) { showToast('Заполните все поля'); return; }
-  const { data, error } = await supabase.auth.signUp({ email, password: pass });
+  const { data, error } = await db.auth.signUp({ email, password: pass });
   if (error) { showToast('Ошибка: ' + error.message); return; }
   currentUser = data.user;
-  await supabase.from('profiles').upsert({ id: currentUser.id, first_name: fname, last_name: lname });
+  await db.from('profiles').upsert({ id: currentUser.id, first_name: fname, last_name: lname });
   await loadProfile();
 }
 
 async function doLogout() {
-  await supabase.auth.signOut();
+  await db.auth.signOut();
   currentUser = null; userProfile = null;
   document.getElementById('app').style.display = 'none';
   document.getElementById('auth-screen').style.display = 'flex';
@@ -832,7 +832,7 @@ async function saveProfile() {
   const fname = document.getElementById('ob-fname').value.trim();
   const lname = document.getElementById('ob-lname').value.trim();
   if (!fname || !lname) { showToast('Введите имя и фамилию'); return; }
-  await supabase.from('profiles').upsert({ id: currentUser.id, first_name: fname, last_name: lname });
+  await db.from('profiles').upsert({ id: currentUser.id, first_name: fname, last_name: lname });
   userProfile = { id: currentUser.id, first_name: fname, last_name: lname };
   showApp();
 }
@@ -841,7 +841,7 @@ async function updateProfile() {
   const fname = document.getElementById('edit-fname').value.trim();
   const lname = document.getElementById('edit-lname').value.trim();
   if (!fname || !lname) { showToast('Заполните имя и фамилию'); return; }
-  await supabase.from('profiles').update({ first_name: fname, last_name: lname }).eq('id', currentUser.id);
+  await db.from('profiles').update({ first_name: fname, last_name: lname }).eq('id', currentUser.id);
   userProfile.first_name = fname; userProfile.last_name = lname;
   renderProfile();
   showToast('Профиль сохранён ✓');
@@ -876,7 +876,7 @@ async function handleAvatarChange(e) {
   const reader = new FileReader();
   reader.onload = async (ev) => {
     const url = ev.target.result;
-    await supabase.from('profiles').update({ avatar_url: url }).eq('id', currentUser.id);
+    await db.from('profiles').update({ avatar_url: url }).eq('id', currentUser.id);
     userProfile.avatar_url = url;
     renderProfile();
     showToast('Фото обновлено ✓');
@@ -888,11 +888,11 @@ async function handleAvatarChange(e) {
 // GROUPS
 // ============================================================
 async function loadGroups() {
-  const { data } = await supabase.from('groups').select('*').order('created_at');
+  const { data } = await db.from('groups').select('*').order('created_at');
   if (!data) return;
   // Load student counts
   for (const g of data) {
-    const { count } = await supabase.from('students').select('id', { count: 'exact', head: true }).eq('group_id', g.id);
+    const { count } = await db.from('students').select('id', { count: 'exact', head: true }).eq('group_id', g.id);
     g._studentCount = count || 0;
   }
   groups = data;
@@ -944,7 +944,7 @@ async function showGroupDetail(group) {
   document.getElementById('student-detail-view').style.display = 'none';
   document.getElementById('groups-fab').style.display = 'none';
 
-  const { data: students } = await supabase.from('students').select('*').eq('group_id', group.id).order('last_name');
+  const { data: students } = await db.from('students').select('*').eq('group_id', group.id).order('last_name');
   currentStudents = students || [];
 
   // Load attendance for this month
@@ -959,13 +959,13 @@ async function loadAttendanceForMonth() {
   const firstDay = `${currentJournalYear}-${String(currentJournalMonth+1).padStart(2,'0')}-01`;
   const lastDay = `${currentJournalYear}-${String(currentJournalMonth+1).padStart(2,'0')}-${new Date(currentJournalYear, currentJournalMonth+1, 0).getDate()}`;
   
-  const { data: att } = await supabase.from('attendance').select('*')
+  const { data: att } = await db.from('attendance').select('*')
     .in('student_id', ids).gte('date', firstDay).lte('date', lastDay);
   attendance = {};
   (att || []).forEach(a => { attendance[a.student_id + '_' + a.date] = a.status; });
 
   // Load payments
-  const { data: pay } = await supabase.from('payments').select('*').in('student_id', ids);
+  const { data: pay } = await db.from('payments').select('*').in('student_id', ids);
   payments = {};
   (pay || []).forEach(p => { payments[p.student_id + '_' + p.year + '_' + p.month] = p.paid; });
 }
@@ -1079,7 +1079,7 @@ function openStatusModal(studentId, date, name) {
 
 async function setStatus(status) {
   const { studentId, date } = pendingStatus;
-  await supabase.from('attendance').upsert({ student_id: studentId, date, status }, { onConflict: 'student_id,date' });
+  await db.from('attendance').upsert({ student_id: studentId, date, status }, { onConflict: 'student_id,date' });
   attendance[studentId + '_' + date] = status;
   closeModal('modal-status');
   renderGroupDetail();
@@ -1089,7 +1089,7 @@ async function togglePayment(studentId, year, month) {
   const key = studentId + '_' + year + '_' + month;
   const current = payments[key] || false;
   const newVal = !current;
-  await supabase.from('payments').upsert({ student_id: studentId, year, month, paid: newVal }, { onConflict: 'student_id,year,month' });
+  await db.from('payments').upsert({ student_id: studentId, year, month, paid: newVal }, { onConflict: 'student_id,year,month' });
   payments[key] = newVal;
   renderGroupDetail();
 }
@@ -1109,7 +1109,7 @@ async function createGroup() {
   const time = document.getElementById('new-group-time').value;
   if (!name) { showToast('Введите название'); return; }
   if (selectedDays.size === 0) { showToast('Выберите дни занятий'); return; }
-  const { data, error } = await supabase.from('groups').insert({ name, time, days: [...selectedDays] }).select().single();
+  const { data, error } = await db.from('groups').insert({ name, time, days: [...selectedDays] }).select().single();
   if (error) { showToast('Ошибка создания'); return; }
   closeModal('modal-group');
   document.getElementById('new-group-name').value = '';
@@ -1121,7 +1121,7 @@ async function createGroup() {
 
 async function confirmDeleteGroup(id) {
   if (!confirm('Удалить группу и всех учеников?')) return;
-  await supabase.from('groups').delete().eq('id', id);
+  await db.from('groups').delete().eq('id', id);
   showGroupsList();
   showToast('Группа удалена');
 }
@@ -1137,7 +1137,7 @@ async function addStudent() {
   const phone = document.getElementById('new-s-phone').value.trim();
   const pphone = document.getElementById('new-s-pphone').value.trim();
   if (!lname || !fname) { showToast('Введите имя и фамилию'); return; }
-  await supabase.from('students').insert({ group_id: currentGroup.id, first_name: fname, last_name: lname, middle_name: mname, iin, phone, parent_phone: pphone });
+  await db.from('students').insert({ group_id: currentGroup.id, first_name: fname, last_name: lname, middle_name: mname, iin, phone, parent_phone: pphone });
   closeModal('modal-student');
   ['new-s-lname','new-s-fname','new-s-mname','new-s-iin','new-s-phone','new-s-pphone'].forEach(id => document.getElementById(id).value = '');
   showToast('Ученик добавлен ✓');
@@ -1150,10 +1150,10 @@ async function openStudent(id) {
   document.getElementById('student-detail-view').style.display = 'block';
 
   // Load payment history
-  const { data: payHistory } = await supabase.from('payments').select('*').eq('student_id', id).order('year').order('month');
+  const { data: payHistory } = await db.from('payments').select('*').eq('student_id', id).order('year').order('month');
   
   // Calculate attendance stats
-  const { data: attData } = await supabase.from('attendance').select('*').eq('student_id', id);
+  const { data: attData } = await db.from('attendance').select('*').eq('student_id', id);
   const presentCount = (attData || []).filter(a => a.status === 'present').length;
   const totalCount = (attData || []).filter(a => a.status !== 'none').length;
 
@@ -1190,15 +1190,15 @@ async function openStudent(id) {
 }
 
 async function toggleStudentPayment(studentId, year, month) {
-  const { data: existing } = await supabase.from('payments').select('*').eq('student_id', studentId).eq('year', year).eq('month', month).single();
+  const { data: existing } = await db.from('payments').select('*').eq('student_id', studentId).eq('year', year).eq('month', month).single();
   const newVal = !(existing?.paid || false);
-  await supabase.from('payments').upsert({ student_id: studentId, year, month, paid: newVal }, { onConflict: 'student_id,year,month' });
+  await db.from('payments').upsert({ student_id: studentId, year, month, paid: newVal }, { onConflict: 'student_id,year,month' });
   openStudent(studentId);
 }
 
 async function deleteStudent(id) {
   if (!confirm('Удалить ученика?')) return;
-  await supabase.from('students').delete().eq('id', id);
+  await db.from('students').delete().eq('id', id);
   showToast('Ученик удалён');
   showGroupDetail(currentGroup);
 }
