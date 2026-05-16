@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#E53E3E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tornado TKD">
+<title>Tornado TKD</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #E53E3E;
+    --red-dark: #C53030;
+    --red-light: #FC8181;
+    --bg: #0f0f0f;
+    --bg2: #1a1a1a;
+    --bg3: #242424;
+    --bg4: #2e2e2e;
+    --text: #f0f0f0;
+    --text2: #a0a0a0;
+    --border: #333;
+    --green: #48BB78;
+    --orange: #ED8936;
+    --blue: #63B3ED;
+    --purple: #9F7AEA;
+    --yellow: #ECC94B;
+    --radius: 14px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+  .light {
+    --bg: #f5f5f5;
+    --bg2: #ffffff;
+    --bg3: #ebebeb;
+    --bg4: #e0e0e0;
+    --text: #111111;
+    --text2: #666666;
+    --border: #d0d0d0;
+    --shadow: 0 4px 24px rgba(0,0,0,0.1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Nunito', sans-serif;
+    font-size: 15px;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* APP SHELL */
+  #app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+  #topbar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px 10px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+    min-height: 56px;
+  }
+  #topbar-title { font-family: 'Bebas Neue', cursive; font-size: 26px; color: var(--red); letter-spacing: 1px; }
+  #topbar-actions { display: flex; gap: 10px; align-items: center; }
+  .icon-btn {
+    background: var(--bg3); border: none; border-radius: 10px; width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text2);
+    font-size: 18px; transition: background 0.2s, color 0.2s;
+  }
+  .icon-btn:active { background: var(--red); color: #fff; }
+  #content { flex: 1; overflow-y: auto; overflow-x: hidden; position: relative; }
+  #navbar {
+    background: var(--bg2); border-top: 1px solid var(--border);
+    display: flex; flex-shrink: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  .nav-item {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 10px 0 8px; cursor: pointer; border: none; background: none;
+    color: var(--text2); font-family: 'Nunito', sans-serif; font-size: 11px; font-weight: 700;
+    transition: color 0.2s; gap: 3px; text-transform: uppercase; letter-spacing: 0.5px;
+  }
+  .nav-item .nav-icon { font-size: 22px; transition: transform 0.2s; }
+  .nav-item.active { color: var(--red); }
+  .nav-item.active .nav-icon { transform: scale(1.15); }
+
+  /* SCREENS */
+  .screen { display: none; padding: 16px; animation: fadeIn 0.2s ease; min-height: 100%; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  /* CARDS */
+  .card {
+    background: var(--bg2); border-radius: var(--radius); padding: 16px;
+    margin-bottom: 12px; border: 1px solid var(--border); box-shadow: var(--shadow);
+  }
+  .card-row { display: flex; align-items: center; gap: 12px; }
+
+  /* BUTTONS */
+  .btn {
+    border: none; border-radius: 10px; padding: 12px 20px; font-family: 'Nunito', sans-serif;
+    font-weight: 800; font-size: 14px; cursor: pointer; transition: all 0.2s; display: inline-flex;
+    align-items: center; gap: 8px; justify-content: center;
+  }
+  .btn-primary { background: var(--red); color: #fff; }
+  .btn-primary:active { background: var(--red-dark); transform: scale(0.97); }
+  .btn-secondary { background: var(--bg3); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:active { background: var(--bg4); }
+  .btn-block { width: 100%; }
+  .btn-sm { padding: 7px 14px; font-size: 13px; border-radius: 8px; }
+
+  /* FAB */
+  .fab {
+    position: fixed; bottom: calc(80px + env(safe-area-inset-bottom, 0)); right: 20px;
+    width: 56px; height: 56px; border-radius: 50%; background: var(--red);
+    color: #fff; font-size: 28px; border: none; cursor: pointer; box-shadow: 0 4px 20px rgba(229,62,62,0.5);
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.2s, box-shadow 0.2s; z-index: 50;
+  }
+  .fab:active { transform: scale(0.93); }
+
+  /* FORMS */
+  .form-group { margin-bottom: 14px; }
+  .form-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text2); margin-bottom: 6px; display: block; }
+  .form-input {
+    width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 10px;
+    padding: 11px 14px; color: var(--text); font-family: 'Nunito', sans-serif; font-size: 15px;
+    outline: none; transition: border-color 0.2s;
+  }
+  .form-input:focus { border-color: var(--red); }
+  .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .day-btn {
+    background: var(--bg3); border: 2px solid var(--border); border-radius: 8px;
+    padding: 8px 0; text-align: center; font-size: 12px; font-weight: 800; cursor: pointer;
+    color: var(--text2); transition: all 0.15s;
+  }
+  .day-btn.selected { background: var(--red); border-color: var(--red); color: #fff; }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100;
+    display: flex; align-items: flex-end; opacity: 0; pointer-events: none; transition: opacity 0.25s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--bg2); border-radius: 20px 20px 0 0; width: 100%; max-height: 92vh;
+    overflow-y: auto; padding: 20px 16px 32px;
+    transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .modal-overlay.open .modal { transform: none; }
+  .modal-handle { width: 40px; height: 4px; background: var(--border); border-radius: 2px; margin: 0 auto 18px; }
+  .modal-title { font-family: 'Bebas Neue', cursive; font-size: 22px; color: var(--red); margin-bottom: 18px; }
+
+  /* SECTION HEADERS */
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .section-title { font-family: 'Bebas Neue', cursive; font-size: 20px; color: var(--text); letter-spacing: 0.5px; }
+
+  /* GROUPS */
+  .group-card {
+    background: var(--bg2); border-radius: var(--radius); padding: 16px;
+    margin-bottom: 12px; border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between; cursor: pointer;
+    transition: border-color 0.2s, transform 0.15s;
+    box-shadow: var(--shadow);
+  }
+  .group-card:active { transform: scale(0.98); border-color: var(--red); }
+  .group-name { font-weight: 800; font-size: 16px; margin-bottom: 4px; }
+  .group-meta { font-size: 12px; color: var(--text2); }
+  .group-badge {
+    background: var(--red); color: #fff; border-radius: 20px; padding: 4px 10px;
+    font-size: 12px; font-weight: 800;
+  }
+  .day-pill {
+    display: inline-block; background: var(--bg3); border-radius: 6px;
+    padding: 2px 7px; font-size: 11px; font-weight: 700; margin: 2px 2px 0 0; color: var(--text2);
+  }
+  .day-pill.active { background: rgba(229,62,62,0.2); color: var(--red); }
+
+  /* STUDENT LIST */
+  .student-row {
+    background: var(--bg2); border-radius: 12px; padding: 14px;
+    margin-bottom: 8px; border: 1px solid var(--border);
+    display: flex; align-items: center; gap: 12px; cursor: pointer;
+    transition: border-color 0.2s;
+  }
+  .student-row:active { border-color: var(--red); }
+  .student-avatar {
+    width: 42px; height: 42px; border-radius: 50%; background: var(--red);
+    display: flex; align-items: center; justify-content: center; font-weight: 800;
+    font-size: 16px; color: #fff; flex-shrink: 0;
+  }
+  .student-name { font-weight: 700; font-size: 15px; }
+  .student-meta { font-size: 12px; color: var(--text2); }
+
+  /* JOURNAL */
+  .journal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--bg2); border-radius: 12px; padding: 12px 16px;
+    margin-bottom: 14px; border: 1px solid var(--border);
+  }
+  .month-nav { display: flex; align-items: center; gap: 12px; }
+  .month-label { font-family: 'Bebas Neue', cursive; font-size: 20px; letter-spacing: 0.5px; }
+  .journal-table-wrap { overflow-x: auto; margin-bottom: 16px; }
+  .journal-table { border-collapse: collapse; width: 100%; min-width: 500px; }
+  .journal-table th {
+    background: var(--bg3); padding: 8px 6px; font-size: 11px; font-weight: 800;
+    text-transform: uppercase; color: var(--text2); text-align: center; border: 1px solid var(--border);
+  }
+  .journal-table th.name-col { text-align: left; min-width: 130px; padding-left: 10px; }
+  .journal-table td {
+    border: 1px solid var(--border); text-align: center; padding: 6px 4px;
+    vertical-align: middle; background: var(--bg2);
+  }
+  .journal-table td.name-cell {
+    text-align: left; padding-left: 10px; font-weight: 700; font-size: 13px;
+    min-width: 130px; white-space: nowrap;
+  }
+  .journal-table tr:hover td { background: var(--bg3); }
+  .status-btn {
+    width: 32px; height: 32px; border-radius: 8px; border: none; cursor: pointer;
+    font-size: 15px; display: flex; align-items: center; justify-content: center;
+    margin: 0 auto; transition: transform 0.15s; background: var(--bg3);
+  }
+  .status-btn:active { transform: scale(0.85); }
+  .status-btn.present { background: rgba(72,187,120,0.2); }
+  .status-btn.absent { background: rgba(229,62,62,0.2); }
+  .status-btn.excused { background: rgba(99,179,237,0.2); }
+  .status-btn.sick { background: rgba(159,122,234,0.2); }
+  .status-btn.competition { background: rgba(236,201,75,0.2); }
+  .pay-cell { white-space: nowrap; padding: 6px 10px; }
+  .pay-btn {
+    padding: 4px 10px; border-radius: 20px; border: none; cursor: pointer; font-size: 11px;
+    font-weight: 800; font-family: 'Nunito', sans-serif; transition: all 0.2s;
+  }
+  .pay-btn.paid { background: rgba(72,187,120,0.2); color: var(--green); }
+  .pay-btn.unpaid { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); }
+
+  /* PAYMENT HISTORY */
+  .pay-history { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 0; }
+  .pay-month {
+    padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; cursor: pointer;
+    transition: all 0.2s; border: 2px solid transparent;
+  }
+  .pay-month.paid { background: rgba(72,187,120,0.2); color: var(--green); border-color: var(--green); }
+  .pay-month.unpaid { background: var(--bg3); color: var(--text2); border-color: var(--border); }
+
+  /* TIMER */
+  .timer-screen { padding: 20px 16px; }
+  .timer-display {
+    text-align: center; padding: 40px 20px;
+    background: var(--bg2); border-radius: 20px; border: 1px solid var(--border);
+    margin-bottom: 20px; position: relative; overflow: hidden;
+  }
+  .timer-display::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(229,62,62,0.08) 0%, transparent 70%);
+  }
+  .timer-phase {
+    font-family: 'Bebas Neue', cursive; font-size: 14px; letter-spacing: 3px;
+    color: var(--text2); margin-bottom: 8px; text-transform: uppercase;
+  }
+  .timer-phase.break-phase { color: var(--orange); }
+  .timer-time {
+    font-family: 'Bebas Neue', cursive; font-size: 88px; line-height: 1;
+    color: var(--text); letter-spacing: 2px;
+  }
+  .timer-time.running { color: var(--red); }
+  .timer-time.break-time { color: var(--orange); }
+  .timer-round { font-size: 14px; font-weight: 700; color: var(--text2); margin-top: 10px; }
+  .round-dots { display: flex; gap: 8px; justify-content: center; margin-top: 12px; flex-wrap: wrap; }
+  .round-dot {
+    width: 10px; height: 10px; border-radius: 50%; background: var(--bg4);
+    transition: background 0.3s;
+  }
+  .round-dot.done { background: var(--green); }
+  .round-dot.active { background: var(--red); box-shadow: 0 0 8px var(--red); }
+  .timer-settings { background: var(--bg2); border-radius: var(--radius); padding: 16px; border: 1px solid var(--border); margin-bottom: 16px; }
+  .timer-setting-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .timer-setting-row:last-child { margin-bottom: 0; }
+  .timer-setting-label { font-weight: 700; font-size: 14px; }
+  .timer-setting-sub { font-size: 12px; color: var(--text2); }
+  .counter-control { display: flex; align-items: center; gap: 12px; }
+  .counter-btn {
+    width: 36px; height: 36px; border-radius: 10px; background: var(--bg3);
+    border: 1px solid var(--border); font-size: 20px; cursor: pointer; color: var(--text);
+    display: flex; align-items: center; justify-content: center; font-family: 'Nunito', sans-serif;
+    transition: background 0.15s;
+  }
+  .counter-btn:active { background: var(--red); color: #fff; border-color: var(--red); }
+  .counter-value { font-family: 'Bebas Neue', cursive; font-size: 24px; min-width: 40px; text-align: center; }
+  .timer-controls { display: flex; gap: 10px; }
+  .timer-controls .btn { flex: 1; padding: 16px; font-size: 16px; border-radius: 14px; }
+
+  /* PROFILE */
+  .profile-hero {
+    display: flex; flex-direction: column; align-items: center; padding: 30px 20px;
+    background: var(--bg2); border-radius: var(--radius); margin-bottom: 16px;
+    border: 1px solid var(--border); position: relative;
+  }
+  .profile-avatar-wrap { position: relative; margin-bottom: 14px; }
+  .profile-avatar {
+    width: 88px; height: 88px; border-radius: 50%; background: var(--red);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bebas Neue', cursive; font-size: 36px; color: #fff;
+    border: 3px solid var(--border); overflow: hidden; cursor: pointer;
+  }
+  .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .avatar-edit {
+    position: absolute; bottom: 0; right: 0; width: 26px; height: 26px; border-radius: 50%;
+    background: var(--red); border: 2px solid var(--bg2); display: flex; align-items: center;
+    justify-content: center; font-size: 12px; cursor: pointer;
+  }
+  .profile-name { font-family: 'Bebas Neue', cursive; font-size: 26px; letter-spacing: 0.5px; }
+  .profile-subtitle { font-size: 13px; color: var(--text2); margin-top: 2px; }
+  .profile-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .stat-card {
+    background: var(--bg2); border-radius: 12px; padding: 14px 10px; text-align: center;
+    border: 1px solid var(--border);
+  }
+  .stat-num { font-family: 'Bebas Neue', cursive; font-size: 28px; color: var(--red); }
+  .stat-label { font-size: 11px; color: var(--text2); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+  /* EMPTY STATE */
+  .empty-state { text-align: center; padding: 50px 20px; }
+  .empty-icon { font-size: 56px; margin-bottom: 16px; }
+  .empty-title { font-family: 'Bebas Neue', cursive; font-size: 22px; margin-bottom: 8px; color: var(--text2); }
+  .empty-sub { font-size: 14px; color: var(--text2); }
+
+  /* BACK BUTTON */
+  .back-btn {
+    display: flex; align-items: center; gap: 8px; background: none; border: none;
+    color: var(--text2); font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 14px;
+    cursor: pointer; margin-bottom: 16px; padding: 4px 0;
+  }
+  .back-btn:active { color: var(--red); }
+
+  /* TOAST */
+  .toast {
+    position: fixed; bottom: calc(90px + env(safe-area-inset-bottom, 0)); left: 50%;
+    transform: translateX(-50%) translateY(20px); background: var(--bg4); color: var(--text);
+    padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: 700;
+    z-index: 200; opacity: 0; transition: all 0.3s; white-space: nowrap;
+    border: 1px solid var(--border); box-shadow: var(--shadow);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ONBOARDING */
+  #onboarding {
+    position: fixed; inset: 0; background: var(--bg); z-index: 300;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 32px 24px; text-align: center;
+  }
+  .onboard-logo { font-family: 'Bebas Neue', cursive; font-size: 52px; color: var(--red); letter-spacing: 2px; margin-bottom: 6px; }
+  .onboard-sub { font-size: 14px; color: var(--text2); margin-bottom: 40px; letter-spacing: 1px; text-transform: uppercase; }
+  .onboard-form { width: 100%; max-width: 360px; }
+  .tornado-icon { font-size: 60px; margin-bottom: 16px; }
+
+  /* BADGE */
+  .badge {
+    display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px;
+    font-size: 11px; font-weight: 800;
+  }
+  .badge-green { background: rgba(72,187,120,0.2); color: var(--green); }
+  .badge-red { background: rgba(229,62,62,0.2); color: var(--red); }
+  .badge-gray { background: var(--bg3); color: var(--text2); }
+
+  /* AUTH */
+  #auth-screen {
+    position: fixed; inset: 0; background: var(--bg); z-index: 300;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 32px 24px;
+  }
+  .auth-logo { font-family: 'Bebas Neue', cursive; font-size: 48px; color: var(--red); letter-spacing: 2px; margin-bottom: 4px; }
+  .auth-tagline { font-size: 13px; color: var(--text2); margin-bottom: 36px; text-transform: uppercase; letter-spacing: 1px; }
+  .auth-form { width: 100%; max-width: 360px; }
+  .auth-tabs { display: flex; background: var(--bg3); border-radius: 12px; padding: 3px; margin-bottom: 20px; }
+  .auth-tab {
+    flex: 1; padding: 9px; border-radius: 10px; border: none; background: none;
+    font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 13px; cursor: pointer;
+    color: var(--text2); transition: all 0.2s;
+  }
+  .auth-tab.active { background: var(--bg2); color: var(--text); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+  .divider { display: flex; align-items: center; gap: 12px; margin: 16px 0; color: var(--text2); font-size: 12px; }
+  .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* SUPABASE CONFIG */
+  #supabase-config {
+    position: fixed; inset: 0; background: var(--bg); z-index: 400;
+    padding: 40px 24px; overflow-y: auto;
+  }
+  .config-logo { font-family: 'Bebas Neue', cursive; font-size: 36px; color: var(--red); margin-bottom: 6px; }
+  .config-title { font-weight: 800; font-size: 18px; margin-bottom: 6px; }
+  .config-sub { font-size: 13px; color: var(--text2); margin-bottom: 24px; line-height: 1.5; }
+  .code-block { background: var(--bg3); border-radius: 10px; padding: 12px; font-size: 11px; font-family: monospace; color: var(--text2); margin: 10px 0; overflow-x: auto; white-space: pre; border: 1px solid var(--border); }
+  .step-badge { background: var(--red); color: #fff; border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; margin-right: 8px; flex-shrink: 0; }
+  .step-row { display: flex; align-items: flex-start; margin-bottom: 16px; }
+  .step-content { flex: 1; }
+  .step-title { font-weight: 800; font-size: 14px; margin-bottom: 4px; }
+  .step-desc { font-size: 13px; color: var(--text2); line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<!-- SUPABASE CONFIG (shown first time) -->
+<div id="supabase-config">
+  <div class="config-logo">⚡ Tornado TKD</div>
+  <div class="config-title">Настройка базы данных</div>
+  <div class="config-sub">Приложение использует Supabase для хранения данных в облаке. Выполните следующие шаги:</div>
+
+  <div class="step-row"><span class="step-badge">1</span><div class="step-content"><div class="step-title">Создайте проект на supabase.com</div><div class="step-desc">Зайдите на supabase.com, создайте бесплатный аккаунт и новый проект.</div></div></div>
+  <div class="step-row"><span class="step-badge">2</span><div class="step-content"><div class="step-title">Скопируйте SQL и выполните в SQL Editor</div><div class="step-desc">В разделе SQL Editor вставьте и выполните этот код:</div>
+  <div class="code-block">-- Профили тренеров
+create table profiles (
+  id uuid references auth.users primary key,
+  first_name text, last_name text, avatar_url text,
+  created_at timestamptz default now()
+);
+-- Группы
+create table groups (
+  id uuid primary key default gen_random_uuid(),
+  name text not null, days int[] not null, time text,
+  created_at timestamptz default now()
+);
+-- Ученики
+create table students (
+  id uuid primary key default gen_random_uuid(),
+  group_id uuid references groups(id) on delete cascade,
+  first_name text, last_name text, middle_name text,
+  iin text, phone text, parent_phone text,
+  created_at timestamptz default now()
+);
+-- Посещаемость
+create table attendance (
+  id uuid primary key default gen_random_uuid(),
+  student_id uuid references students(id) on delete cascade,
+  date date not null, status text default 'none',
+  unique(student_id, date)
+);
+-- Оплата
+create table payments (
+  id uuid primary key default gen_random_uuid(),
+  student_id uuid references students(id) on delete cascade,
+  year int, month int, paid boolean default false,
+  unique(student_id, year, month)
+);
+-- RLS (все аутентифицированные пользователи видят всё)
+alter table profiles enable row level security;
+alter table groups enable row level security;
+alter table students enable row level security;
+alter table attendance enable row level security;
+alter table payments enable row level security;
+create policy "auth_all" on profiles for all using (auth.role()='authenticated');
+create policy "auth_all" on groups for all using (auth.role()='authenticated');
+create policy "auth_all" on students for all using (auth.role()='authenticated');
+create policy "auth_all" on attendance for all using (auth.role()='authenticated');
+create policy "auth_all" on payments for all using (auth.role()='authenticated');</div></div></div>
+  <div class="step-row"><span class="step-badge">3</span><div class="step-content"><div class="step-title">Введите ваши ключи Supabase</div><div class="step-desc">Project Settings → API → скопируйте URL и anon key:</div></div></div>
+  
+  <div class="form-group"><label class="form-label">Supabase URL</label><input class="form-input" id="cfg-url" placeholder="https://xxxx.supabase.co" type="url"></div>
+  <div class="form-group"><label class="form-label">Anon Key</label><input class="form-input" id="cfg-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." type="text"></div>
+  <button class="btn btn-primary btn-block" onclick="saveConfig()" style="margin-bottom:32px">Подключить →</button>
+</div>
+
+<!-- AUTH -->
+<div id="auth-screen" style="display:none">
+  <div class="tornado-icon">🌪️</div>
+  <div class="auth-logo">TORNADO TKD</div>
+  <div class="auth-tagline">Тхэквондо · Журнал тренера</div>
+  <div class="auth-form">
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Войти</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')">Регистрация</button>
+    </div>
+    <div id="auth-login">
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="login-email" type="email" placeholder="coach@tornado.kz"></div>
+      <div class="form-group"><label class="form-label">Пароль</label><input class="form-input" id="login-pass" type="password" placeholder="••••••••"></div>
+      <button class="btn btn-primary btn-block" onclick="doLogin()">Войти</button>
+    </div>
+    <div id="auth-register" style="display:none">
+      <div class="form-group"><label class="form-label">Имя</label><input class="form-input" id="reg-fname" type="text" placeholder="Иван"></div>
+      <div class="form-group"><label class="form-label">Фамилия</label><input class="form-input" id="reg-lname" type="text" placeholder="Иванов"></div>
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="reg-email" type="email" placeholder="coach@tornado.kz"></div>
+      <div class="form-group"><label class="form-label">Пароль</label><input class="form-input" id="reg-pass" type="password" placeholder="Минимум 6 символов"></div>
+      <button class="btn btn-primary btn-block" onclick="doRegister()">Создать аккаунт</button>
+    </div>
+    <p style="text-align:center;margin-top:16px;font-size:13px;color:var(--text2)">
+      <span style="cursor:pointer;text-decoration:underline" onclick="resetConfig()">Изменить настройки подключения</span>
+    </p>
+  </div>
+</div>
+
+<!-- ONBOARDING (profile setup) -->
+<div id="onboarding" style="display:none">
+  <div class="tornado-icon">🌪️</div>
+  <div class="onboard-logo">TORNADO TKD</div>
+  <div class="onboard-sub">Настройте ваш профиль тренера</div>
+  <div class="onboard-form">
+    <div class="form-group"><label class="form-label">Имя</label><input class="form-input" id="ob-fname" type="text" placeholder="Иван"></div>
+    <div class="form-group"><label class="form-label">Фамилия</label><input class="form-input" id="ob-lname" type="text" placeholder="Иванов"></div>
+    <button class="btn btn-primary btn-block" onclick="saveProfile()">Начать работу 🥋</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" style="display:none">
+  <div id="topbar">
+    <div id="topbar-title">TORNADO TKD</div>
+    <div id="topbar-actions">
+      <button class="icon-btn" onclick="toggleTheme()" title="Сменить тему">☀️</button>
+      <button class="icon-btn" onclick="doLogout()" title="Выйти">🚪</button>
+    </div>
+  </div>
+
+  <div id="content">
+    <!-- GROUPS LIST -->
+    <div id="screen-groups" class="screen active">
+      <div id="groups-list-view">
+        <div class="section-header">
+          <div class="section-title">Группы</div>
+          <div id="groups-count" style="font-size:13px;color:var(--text2)"></div>
+        </div>
+        <div id="groups-container"></div>
+      </div>
+
+      <!-- GROUP DETAIL -->
+      <div id="group-detail-view" style="display:none">
+        <button class="back-btn" onclick="showGroupsList()">← Назад</button>
+        <div id="group-detail-content"></div>
+      </div>
+
+      <!-- STUDENT DETAIL -->
+      <div id="student-detail-view" style="display:none">
+        <button class="back-btn" onclick="showGroupDetail(currentGroup)">← Назад</button>
+        <div id="student-detail-content"></div>
+      </div>
+    </div>
+
+    <!-- TIMER -->
+    <div id="screen-timer" class="screen">
+      <div class="timer-display">
+        <div class="timer-phase" id="timer-phase">ГОТОВ</div>
+        <div class="timer-time" id="timer-time">00:00</div>
+        <div class="timer-round" id="timer-round-label">Настройте параметры</div>
+        <div class="round-dots" id="round-dots"></div>
+      </div>
+      <div class="timer-settings">
+        <div class="timer-setting-row">
+          <div><div class="timer-setting-label">Раунды</div></div>
+          <div class="counter-control">
+            <button class="counter-btn" onclick="adjustTimer('rounds',-1)">−</button>
+            <div class="counter-value" id="t-rounds">3</div>
+            <button class="counter-btn" onclick="adjustTimer('rounds',1)">+</button>
+          </div>
+        </div>
+        <div class="timer-setting-row">
+          <div><div class="timer-setting-label">Длительность раунда</div><div class="timer-setting-sub" id="round-dur-label">2 мин 0 сек</div></div>
+          <div class="counter-control">
+            <button class="counter-btn" onclick="adjustTimer('roundSec',-15)">−</button>
+            <div class="counter-value" id="t-round-sec" style="font-size:18px">120с</div>
+            <button class="counter-btn" onclick="adjustTimer('roundSec',15)">+</button>
+          </div>
+        </div>
+        <div class="timer-setting-row">
+          <div><div class="timer-setting-label">Перерыв</div><div class="timer-setting-sub" id="break-dur-label">1 мин 0 сек</div></div>
+          <div class="counter-control">
+            <button class="counter-btn" onclick="adjustTimer('breakSec',-15)">−</button>
+            <div class="counter-value" id="t-break-sec" style="font-size:18px">60с</div>
+            <button class="counter-btn" onclick="adjustTimer('breakSec',15)">+</button>
+          </div>
+        </div>
+      </div>
+      <div class="timer-controls">
+        <button class="btn btn-secondary" id="timer-reset-btn" onclick="resetTimer()">↺ Сброс</button>
+        <button class="btn btn-primary" id="timer-start-btn" onclick="toggleTimer()">▶ Старт</button>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div id="screen-profile" class="screen">
+      <div class="profile-hero">
+        <div class="profile-avatar-wrap">
+          <div class="profile-avatar" id="profile-avatar-display" onclick="document.getElementById('avatar-input').click()">?</div>
+          <div class="avatar-edit">✏️</div>
+        </div>
+        <input type="file" id="avatar-input" accept="image/*" style="display:none" onchange="handleAvatarChange(event)">
+        <div class="profile-name" id="profile-name-display">—</div>
+        <div class="profile-subtitle">Тренер · Tornado TKD</div>
+      </div>
+      <div class="profile-stats">
+        <div class="stat-card"><div class="stat-num" id="stat-groups">0</div><div class="stat-label">Групп</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-students">0</div><div class="stat-label">Учеников</div></div>
+        <div class="stat-card"><div class="stat-num" id="stat-today">0</div><div class="stat-label">Сегодня</div></div>
+      </div>
+      <div class="card">
+        <div class="section-title" style="margin-bottom:14px;font-size:17px">Редактировать профиль</div>
+        <div class="form-group"><label class="form-label">Имя</label><input class="form-input" id="edit-fname" type="text"></div>
+        <div class="form-group"><label class="form-label">Фамилия</label><input class="form-input" id="edit-lname" type="text"></div>
+        <button class="btn btn-primary btn-block" onclick="updateProfile()">Сохранить</button>
+      </div>
+    </div>
+  </div>
+
+  <nav id="navbar">
+    <button class="nav-item active" onclick="switchTab('groups')" data-tab="groups">
+      <span class="nav-icon">🥋</span><span>Группы</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('timer')" data-tab="timer">
+      <span class="nav-icon">⏱</span><span>Таймер</span>
+    </button>
+    <button class="nav-item" onclick="switchTab('profile')" data-tab="profile">
+      <span class="nav-icon">👤</span><span>Профиль</span>
+    </button>
+  </nav>
+</div>
+
+<!-- FAB for groups -->
+<button class="fab" id="groups-fab" onclick="openModal('modal-group')" style="display:none">+</button>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- MODAL: Add Group -->
+<div class="modal-overlay" id="modal-group">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Новая группа</div>
+    <div class="form-group"><label class="form-label">Название группы</label><input class="form-input" id="new-group-name" placeholder="Например: Новички, Взрослые..."></div>
+    <div class="form-group"><label class="form-label">Время занятий</label><input class="form-input" id="new-group-time" type="time" value="18:00"></div>
+    <div class="form-group">
+      <label class="form-label">Дни занятий</label>
+      <div class="days-grid" id="days-picker">
+        <div class="day-btn" data-day="1">Пн</div>
+        <div class="day-btn" data-day="2">Вт</div>
+        <div class="day-btn" data-day="3">Ср</div>
+        <div class="day-btn" data-day="4">Чт</div>
+        <div class="day-btn" data-day="5">Пт</div>
+        <div class="day-btn" data-day="6">Сб</div>
+        <div class="day-btn" data-day="0">Вс</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-secondary" style="flex:1" onclick="closeModal('modal-group')">Отмена</button>
+      <button class="btn btn-primary" style="flex:1" onclick="createGroup()">Создать</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Add Student -->
+<div class="modal-overlay" id="modal-student">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Добавить ученика</div>
+    <div class="form-group"><label class="form-label">Фамилия</label><input class="form-input" id="new-s-lname" placeholder="Иванов"></div>
+    <div class="form-group"><label class="form-label">Имя</label><input class="form-input" id="new-s-fname" placeholder="Иван"></div>
+    <div class="form-group"><label class="form-label">Отчество</label><input class="form-input" id="new-s-mname" placeholder="Иванович (необязательно)"></div>
+    <div class="form-group"><label class="form-label">ИИН</label><input class="form-input" id="new-s-iin" placeholder="000000000000" maxlength="12" inputmode="numeric"></div>
+    <div class="form-group"><label class="form-label">Личный телефон</label><input class="form-input" id="new-s-phone" placeholder="+7 777 000 0000" type="tel"></div>
+    <div class="form-group"><label class="form-label">Телефон родителей</label><input class="form-input" id="new-s-pphone" placeholder="+7 777 000 0000" type="tel"></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-secondary" style="flex:1" onclick="closeModal('modal-student')">Отмена</button>
+      <button class="btn btn-primary" style="flex:1" onclick="addStudent()">Добавить</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Attendance status picker -->
+<div class="modal-overlay" id="modal-status">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Статус посещения</div>
+    <div id="status-student-name" style="color:var(--text2);font-size:14px;margin-bottom:16px"></div>
+    <div style="display:flex;flex-direction:column;gap:10px" id="status-options"></div>
+    <button class="btn btn-secondary btn-block" style="margin-top:14px" onclick="closeModal('modal-status')">Отмена</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ============================================================
+// STATE
+// ============================================================
+let supabase = null;
+let currentUser = null;
+let userProfile = null;
+let groups = [];
+let currentGroup = null;
+let currentStudents = [];
+let currentStudent = null;
+let currentJournalMonth = new Date().getMonth();
+let currentJournalYear = new Date().getFullYear();
+let attendance = {};
+let payments = {};
+
+// Timer state
+let timerState = { rounds: 3, roundSec: 120, breakSec: 60 };
+let timerRunning = false;
+let timerInterval = null;
+let timerCurrentRound = 0;
+let timerSecondsLeft = 0;
+let timerPhase = 'idle'; // idle, round, break, done
+
+const DAY_NAMES = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+const DAY_NAMES_FULL = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
+const MONTH_NAMES = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+const STATUSES = [
+  { key: 'present', emoji: '✅', label: 'Пришёл', cls: 'present' },
+  { key: 'absent', emoji: '❌', label: 'Не пришёл', cls: 'absent' },
+  { key: 'excused', emoji: '🕊️', label: 'Уважительная', cls: 'excused' },
+  { key: 'sick', emoji: '🤒', label: 'Болезнь', cls: 'sick' },
+  { key: 'competition', emoji: '🏆', label: 'Соревнование', cls: 'competition' },
+];
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('load', () => {
+  const theme = localStorage.getItem('tkd-theme') || 'dark';
+  if (theme === 'light') document.body.classList.add('light');
+  
+  const url = localStorage.getItem('tkd-supa-url');
+  const key = localStorage.getItem('tkd-supa-key');
+  if (url && key) {
+    initSupabase(url, key);
+  }
+});
+
+function initSupabase(url, key) {
+  try {
+    supabase = window.supabase.createClient(url, key);
+    document.getElementById('supabase-config').style.display = 'none';
+    checkAuth();
+  } catch(e) {
+    showToast('Ошибка подключения');
+  }
+}
+
+function saveConfig() {
+  const url = document.getElementById('cfg-url').value.trim();
+  const key = document.getElementById('cfg-key').value.trim();
+  if (!url || !key) { showToast('Введите URL и ключ'); return; }
+  localStorage.setItem('tkd-supa-url', url);
+  localStorage.setItem('tkd-supa-key', key);
+  initSupabase(url, key);
+}
+
+function resetConfig() {
+  localStorage.removeItem('tkd-supa-url');
+  localStorage.removeItem('tkd-supa-key');
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('supabase-config').style.display = 'block';
+}
+
+async function checkAuth() {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    currentUser = session.user;
+    await loadProfile();
+  } else {
+    document.getElementById('auth-screen').style.display = 'flex';
+  }
+}
+
+async function loadProfile() {
+  const { data } = await supabase.from('profiles').select('*').eq('id', currentUser.id).single();
+  if (data && data.first_name) {
+    userProfile = data;
+    showApp();
+  } else {
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('onboarding').style.display = 'flex';
+  }
+}
+
+function showApp() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('onboarding').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  renderProfile();
+  loadGroups();
+  updateTimerDisplay();
+}
+
+// ============================================================
+// AUTH
+// ============================================================
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((t,i) => {
+    t.classList.toggle('active', (i===0 && tab==='login') || (i===1 && tab==='register'));
+  });
+  document.getElementById('auth-login').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('auth-register').style.display = tab === 'register' ? 'block' : 'none';
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  if (!email || !pass) { showToast('Заполните все поля'); return; }
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
+  if (error) { showToast('Ошибка: ' + error.message); return; }
+  currentUser = data.user;
+  await loadProfile();
+}
+
+async function doRegister() {
+  const fname = document.getElementById('reg-fname').value.trim();
+  const lname = document.getElementById('reg-lname').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pass = document.getElementById('reg-pass').value;
+  if (!fname || !lname || !email || !pass) { showToast('Заполните все поля'); return; }
+  const { data, error } = await supabase.auth.signUp({ email, password: pass });
+  if (error) { showToast('Ошибка: ' + error.message); return; }
+  currentUser = data.user;
+  await supabase.from('profiles').upsert({ id: currentUser.id, first_name: fname, last_name: lname });
+  await loadProfile();
+}
+
+async function doLogout() {
+  await supabase.auth.signOut();
+  currentUser = null; userProfile = null;
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('groups-fab').style.display = 'none';
+}
+
+async function saveProfile() {
+  const fname = document.getElementById('ob-fname').value.trim();
+  const lname = document.getElementById('ob-lname').value.trim();
+  if (!fname || !lname) { showToast('Введите имя и фамилию'); return; }
+  await supabase.from('profiles').upsert({ id: currentUser.id, first_name: fname, last_name: lname });
+  userProfile = { id: currentUser.id, first_name: fname, last_name: lname };
+  showApp();
+}
+
+async function updateProfile() {
+  const fname = document.getElementById('edit-fname').value.trim();
+  const lname = document.getElementById('edit-lname').value.trim();
+  if (!fname || !lname) { showToast('Заполните имя и фамилию'); return; }
+  await supabase.from('profiles').update({ first_name: fname, last_name: lname }).eq('id', currentUser.id);
+  userProfile.first_name = fname; userProfile.last_name = lname;
+  renderProfile();
+  showToast('Профиль сохранён ✓');
+}
+
+function renderProfile() {
+  if (!userProfile) return;
+  const name = userProfile.first_name + ' ' + userProfile.last_name;
+  document.getElementById('profile-name-display').textContent = name;
+  document.getElementById('edit-fname').value = userProfile.first_name || '';
+  document.getElementById('edit-lname').value = userProfile.last_name || '';
+  const av = document.getElementById('profile-avatar-display');
+  if (userProfile.avatar_url) {
+    av.innerHTML = `<img src="${userProfile.avatar_url}" alt="">`;
+  } else {
+    av.textContent = (userProfile.first_name[0] || '?') + (userProfile.last_name[0] || '');
+  }
+  // stats
+  document.getElementById('stat-groups').textContent = groups.length;
+  const totalStudents = groups.reduce((a,g) => a + (g._studentCount || 0), 0);
+  document.getElementById('stat-students').textContent = totalStudents;
+  const todayGroups = groups.filter(g => {
+    const day = new Date().getDay();
+    return g.days && g.days.includes(day);
+  }).length;
+  document.getElementById('stat-today').textContent = todayGroups;
+}
+
+async function handleAvatarChange(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async (ev) => {
+    const url = ev.target.result;
+    await supabase.from('profiles').update({ avatar_url: url }).eq('id', currentUser.id);
+    userProfile.avatar_url = url;
+    renderProfile();
+    showToast('Фото обновлено ✓');
+  };
+  reader.readAsDataURL(file);
+}
+
+// ============================================================
+// GROUPS
+// ============================================================
+async function loadGroups() {
+  const { data } = await supabase.from('groups').select('*').order('created_at');
+  if (!data) return;
+  // Load student counts
+  for (const g of data) {
+    const { count } = await supabase.from('students').select('id', { count: 'exact', head: true }).eq('group_id', g.id);
+    g._studentCount = count || 0;
+  }
+  groups = data;
+  renderGroupsList();
+  renderProfile();
+}
+
+function renderGroupsList() {
+  const cont = document.getElementById('groups-container');
+  document.getElementById('groups-count').textContent = groups.length + ' групп';
+  if (groups.length === 0) {
+    cont.innerHTML = `<div class="empty-state"><div class="empty-icon">🥋</div><div class="empty-title">Нет групп</div><div class="empty-sub">Нажмите + чтобы создать первую группу</div></div>`;
+    return;
+  }
+  cont.innerHTML = groups.map(g => {
+    const dayPills = [1,2,3,4,5,6,0].map(d =>
+      `<span class="day-pill ${g.days && g.days.includes(d) ? 'active' : ''}">${DAY_NAMES[d]}</span>`
+    ).join('');
+    return `<div class="group-card" onclick="openGroup('${g.id}')">
+      <div>
+        <div class="group-name">${g.name}</div>
+        <div class="group-meta">${g.time || ''} &nbsp;${dayPills}</div>
+      </div>
+      <div class="group-badge">${g._studentCount} уч.</div>
+    </div>`;
+  }).join('');
+}
+
+function openGroup(id) {
+  currentGroup = groups.find(g => g.id === id);
+  document.getElementById('groups-list-view').style.display = 'none';
+  document.getElementById('group-detail-view').style.display = 'block';
+  document.getElementById('student-detail-view').style.display = 'none';
+  showGroupDetail(currentGroup);
+}
+
+function showGroupsList() {
+  document.getElementById('groups-list-view').style.display = 'block';
+  document.getElementById('group-detail-view').style.display = 'none';
+  document.getElementById('student-detail-view').style.display = 'none';
+  document.getElementById('groups-fab').style.display = currentTab === 'groups' ? 'flex' : 'none';
+  loadGroups();
+}
+
+async function showGroupDetail(group) {
+  currentGroup = group;
+  document.getElementById('groups-list-view').style.display = 'none';
+  document.getElementById('group-detail-view').style.display = 'block';
+  document.getElementById('student-detail-view').style.display = 'none';
+  document.getElementById('groups-fab').style.display = 'none';
+
+  const { data: students } = await supabase.from('students').select('*').eq('group_id', group.id).order('last_name');
+  currentStudents = students || [];
+
+  // Load attendance for this month
+  await loadAttendanceForMonth();
+
+  renderGroupDetail();
+}
+
+async function loadAttendanceForMonth() {
+  if (currentStudents.length === 0) return;
+  const ids = currentStudents.map(s => s.id);
+  const firstDay = `${currentJournalYear}-${String(currentJournalMonth+1).padStart(2,'0')}-01`;
+  const lastDay = `${currentJournalYear}-${String(currentJournalMonth+1).padStart(2,'0')}-${new Date(currentJournalYear, currentJournalMonth+1, 0).getDate()}`;
+  
+  const { data: att } = await supabase.from('attendance').select('*')
+    .in('student_id', ids).gte('date', firstDay).lte('date', lastDay);
+  attendance = {};
+  (att || []).forEach(a => { attendance[a.student_id + '_' + a.date] = a.status; });
+
+  // Load payments
+  const { data: pay } = await supabase.from('payments').select('*').in('student_id', ids);
+  payments = {};
+  (pay || []).forEach(p => { payments[p.student_id + '_' + p.year + '_' + p.month] = p.paid; });
+}
+
+function getGroupDatesInMonth(group, year, month) {
+  const dates = [];
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date = new Date(year, month, d);
+    const dow = date.getDay();
+    if (group.days && group.days.includes(dow)) {
+      dates.push(d);
+    }
+  }
+  return dates;
+}
+
+function renderGroupDetail() {
+  const group = currentGroup;
+  const dates = getGroupDatesInMonth(group, currentJournalYear, currentJournalMonth);
+  
+  const dayPills = [1,2,3,4,5,6,0].map(d =>
+    `<span class="day-pill ${group.days && group.days.includes(d) ? 'active' : ''}">${DAY_NAMES[d]}</span>`
+  ).join('');
+
+  let studentsHtml = '';
+  if (currentStudents.length === 0) {
+    studentsHtml = `<div class="empty-state" style="padding:30px 0"><div class="empty-icon">👤</div><div class="empty-title">Нет учеников</div><div class="empty-sub">Нажмите кнопку чтобы добавить</div></div>`;
+  } else {
+    // Build journal table
+    const dateHeaders = dates.map(d => {
+      const dow = new Date(currentJournalYear, currentJournalMonth, d).getDay();
+      return `<th><div style="font-size:13px">${d}</div><div style="font-size:10px;color:var(--text2)">${DAY_NAMES[dow]}</div></th>`;
+    }).join('');
+
+    const rows = currentStudents.map(s => {
+      const dateCells = dates.map(d => {
+        const dateStr = `${currentJournalYear}-${String(currentJournalMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const status = attendance[s.id + '_' + dateStr] || 'none';
+        const st = STATUSES.find(x => x.key === status);
+        const emoji = st ? st.emoji : '·';
+        const cls = st ? st.cls : '';
+        return `<td><button class="status-btn ${cls}" onclick="openStatusModal('${s.id}','${dateStr}','${s.last_name} ${s.first_name}')">${emoji}</button></td>`;
+      }).join('');
+
+      // Payment for current month
+      const payKey = s.id + '_' + currentJournalYear + '_' + currentJournalMonth;
+      const isPaid = payments[payKey] || false;
+      const payBtn = `<button class="pay-btn ${isPaid ? 'paid' : 'unpaid'}" onclick="togglePayment('${s.id}',${currentJournalYear},${currentJournalMonth})">${isPaid ? '✓ Оплачено' : 'Не оплач.'}</button>`;
+
+      return `<tr>
+        <td class="name-cell" onclick="openStudent('${s.id}')" style="cursor:pointer">${s.last_name} ${s.first_name}</td>
+        ${dateCells}
+        <td class="pay-cell">${payBtn}</td>
+      </tr>`;
+    }).join('');
+
+    studentsHtml = `
+      <div class="journal-table-wrap">
+        <table class="journal-table">
+          <thead><tr>
+            <th class="name-col">Ученик</th>
+            ${dateHeaders}
+            <th>Оплата</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+  }
+
+  document.getElementById('group-detail-content').innerHTML = `
+    <div style="margin-bottom:16px">
+      <div style="font-family:'Bebas Neue',cursive;font-size:26px;color:var(--red)">${group.name}</div>
+      <div style="color:var(--text2);font-size:13px;margin-top:4px">${group.time || ''} &nbsp; ${dayPills}</div>
+    </div>
+
+    <div class="journal-header">
+      <button class="icon-btn" onclick="changeMonth(-1)">‹</button>
+      <div class="month-label">${MONTH_NAMES[currentJournalMonth]} ${currentJournalYear}</div>
+      <button class="icon-btn" onclick="changeMonth(1)">›</button>
+    </div>
+
+    ${studentsHtml}
+
+    <button class="btn btn-primary btn-block" style="margin-top:8px" onclick="openModal('modal-student')">+ Добавить ученика</button>
+    <button class="btn btn-secondary btn-block" style="margin-top:8px" onclick="confirmDeleteGroup('${group.id}')">🗑 Удалить группу</button>
+  `;
+}
+
+async function changeMonth(dir) {
+  currentJournalMonth += dir;
+  if (currentJournalMonth > 11) { currentJournalMonth = 0; currentJournalYear++; }
+  if (currentJournalMonth < 0) { currentJournalMonth = 11; currentJournalYear--; }
+  await loadAttendanceForMonth();
+  renderGroupDetail();
+}
+
+// Status modal
+let pendingStatus = { studentId: null, date: null };
+function openStatusModal(studentId, date, name) {
+  pendingStatus = { studentId, date };
+  document.getElementById('status-student-name').textContent = name + ' · ' + date;
+  const opts = document.getElementById('status-options');
+  opts.innerHTML = STATUSES.map(s => `
+    <button class="btn btn-secondary" style="justify-content:flex-start;gap:12px" onclick="setStatus('${s.key}')">
+      <span style="font-size:20px">${s.emoji}</span><span>${s.label}</span>
+    </button>
+  `).join('');
+  openModal('modal-status');
+}
+
+async function setStatus(status) {
+  const { studentId, date } = pendingStatus;
+  await supabase.from('attendance').upsert({ student_id: studentId, date, status }, { onConflict: 'student_id,date' });
+  attendance[studentId + '_' + date] = status;
+  closeModal('modal-status');
+  renderGroupDetail();
+}
+
+async function togglePayment(studentId, year, month) {
+  const key = studentId + '_' + year + '_' + month;
+  const current = payments[key] || false;
+  const newVal = !current;
+  await supabase.from('payments').upsert({ student_id: studentId, year, month, paid: newVal }, { onConflict: 'student_id,year,month' });
+  payments[key] = newVal;
+  renderGroupDetail();
+}
+
+// Create group
+const selectedDays = new Set();
+document.getElementById('days-picker').addEventListener('click', e => {
+  const btn = e.target.closest('.day-btn');
+  if (!btn) return;
+  const day = parseInt(btn.dataset.day);
+  if (selectedDays.has(day)) { selectedDays.delete(day); btn.classList.remove('selected'); }
+  else { selectedDays.add(day); btn.classList.add('selected'); }
+});
+
+async function createGroup() {
+  const name = document.getElementById('new-group-name').value.trim();
+  const time = document.getElementById('new-group-time').value;
+  if (!name) { showToast('Введите название'); return; }
+  if (selectedDays.size === 0) { showToast('Выберите дни занятий'); return; }
+  const { data, error } = await supabase.from('groups').insert({ name, time, days: [...selectedDays] }).select().single();
+  if (error) { showToast('Ошибка создания'); return; }
+  closeModal('modal-group');
+  document.getElementById('new-group-name').value = '';
+  selectedDays.clear();
+  document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('selected'));
+  showToast('Группа создана ✓');
+  loadGroups();
+}
+
+async function confirmDeleteGroup(id) {
+  if (!confirm('Удалить группу и всех учеников?')) return;
+  await supabase.from('groups').delete().eq('id', id);
+  showGroupsList();
+  showToast('Группа удалена');
+}
+
+// ============================================================
+// STUDENTS
+// ============================================================
+async function addStudent() {
+  const lname = document.getElementById('new-s-lname').value.trim();
+  const fname = document.getElementById('new-s-fname').value.trim();
+  const mname = document.getElementById('new-s-mname').value.trim();
+  const iin = document.getElementById('new-s-iin').value.trim();
+  const phone = document.getElementById('new-s-phone').value.trim();
+  const pphone = document.getElementById('new-s-pphone').value.trim();
+  if (!lname || !fname) { showToast('Введите имя и фамилию'); return; }
+  await supabase.from('students').insert({ group_id: currentGroup.id, first_name: fname, last_name: lname, middle_name: mname, iin, phone, parent_phone: pphone });
+  closeModal('modal-student');
+  ['new-s-lname','new-s-fname','new-s-mname','new-s-iin','new-s-phone','new-s-pphone'].forEach(id => document.getElementById(id).value = '');
+  showToast('Ученик добавлен ✓');
+  showGroupDetail(currentGroup);
+}
+
+async function openStudent(id) {
+  currentStudent = currentStudents.find(s => s.id === id);
+  document.getElementById('group-detail-view').style.display = 'none';
+  document.getElementById('student-detail-view').style.display = 'block';
+
+  // Load payment history
+  const { data: payHistory } = await supabase.from('payments').select('*').eq('student_id', id).order('year').order('month');
+  
+  // Calculate attendance stats
+  const { data: attData } = await supabase.from('attendance').select('*').eq('student_id', id);
+  const presentCount = (attData || []).filter(a => a.status === 'present').length;
+  const totalCount = (attData || []).filter(a => a.status !== 'none').length;
+
+  const payHtml = (payHistory || []).length === 0 
+    ? '<div style="color:var(--text2);font-size:13px">Нет данных об оплате</div>'
+    : (payHistory || []).map(p => `
+        <button class="pay-month ${p.paid ? 'paid' : 'unpaid'}" onclick="toggleStudentPayment('${p.student_id}',${p.year},${p.month})">
+          ${MONTH_NAMES[p.month]} ${p.year} ${p.paid ? '✓' : '✗'}
+        </button>`).join('');
+
+  document.getElementById('student-detail-content').innerHTML = `
+    <div class="profile-hero" style="margin-bottom:16px">
+      <div class="student-avatar" style="width:64px;height:64px;font-size:22px;margin-bottom:10px">
+        ${currentStudent.first_name[0]}${currentStudent.last_name[0]}
+      </div>
+      <div style="font-family:'Bebas Neue',cursive;font-size:22px">${currentStudent.last_name} ${currentStudent.first_name} ${currentStudent.middle_name || ''}</div>
+      <div style="color:var(--text2);font-size:13px;margin-top:4px">${currentGroup.name}</div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div class="section-title" style="font-size:16px;margin-bottom:12px">Данные</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--text2);font-size:13px">ИИН</span><span style="font-weight:700">${currentStudent.iin || '—'}</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--text2);font-size:13px">Телефон</span><span style="font-weight:700">${currentStudent.phone || '—'}</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--text2);font-size:13px">Тел. родителей</span><span style="font-weight:700">${currentStudent.parent_phone || '—'}</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:var(--text2);font-size:13px">Посещений</span><span style="font-weight:700">${presentCount} / ${totalCount}</span></div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div class="section-title" style="font-size:16px;margin-bottom:12px">История оплаты</div>
+      <div class="pay-history">${payHtml}</div>
+    </div>
+    <button class="btn btn-secondary btn-block" style="color:var(--red);border-color:rgba(229,62,62,0.3)" onclick="deleteStudent('${currentStudent.id}')">🗑 Удалить ученика</button>
+  `;
+}
+
+async function toggleStudentPayment(studentId, year, month) {
+  const { data: existing } = await supabase.from('payments').select('*').eq('student_id', studentId).eq('year', year).eq('month', month).single();
+  const newVal = !(existing?.paid || false);
+  await supabase.from('payments').upsert({ student_id: studentId, year, month, paid: newVal }, { onConflict: 'student_id,year,month' });
+  openStudent(studentId);
+}
+
+async function deleteStudent(id) {
+  if (!confirm('Удалить ученика?')) return;
+  await supabase.from('students').delete().eq('id', id);
+  showToast('Ученик удалён');
+  showGroupDetail(currentGroup);
+}
+
+// ============================================================
+// TIMER
+// ============================================================
+function adjustTimer(key, delta) {
+  if (timerRunning) return;
+  if (key === 'rounds') { timerState.rounds = Math.max(1, Math.min(20, timerState.rounds + delta)); }
+  if (key === 'roundSec') { timerState.roundSec = Math.max(15, Math.min(600, timerState.roundSec + delta)); }
+  if (key === 'breakSec') { timerState.breakSec = Math.max(15, Math.min(300, timerState.breakSec + delta)); }
+  updateTimerDisplay();
+}
+
+function updateTimerDisplay() {
+  document.getElementById('t-rounds').textContent = timerState.rounds;
+  document.getElementById('t-round-sec').textContent = timerState.roundSec + 'с';
+  document.getElementById('t-break-sec').textContent = timerState.breakSec + 'с';
+  document.getElementById('round-dur-label').textContent = formatDurLabel(timerState.roundSec);
+  document.getElementById('break-dur-label').textContent = formatDurLabel(timerState.breakSec);
+  if (timerPhase === 'idle') {
+    document.getElementById('timer-time').textContent = formatTime(timerState.roundSec);
+    document.getElementById('timer-time').className = 'timer-time';
+    document.getElementById('timer-phase').textContent = 'ГОТОВ';
+    document.getElementById('timer-phase').className = 'timer-phase';
+    document.getElementById('timer-round-label').textContent = `${timerState.rounds} раундов · ${formatDurLabel(timerState.roundSec)} / ${formatDurLabel(timerState.breakSec)} перерыв`;
+    renderRoundDots(0, -1);
+  }
+}
+
+function formatDurLabel(sec) {
+  const m = Math.floor(sec / 60), s = sec % 60;
+  return m > 0 ? `${m} мин ${s} сек` : `${s} сек`;
+}
+
+function formatTime(sec) {
+  const m = Math.floor(sec / 60), s = sec % 60;
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function renderRoundDots(completedRounds, activeRound) {
+  const cont = document.getElementById('round-dots');
+  cont.innerHTML = Array.from({length: timerState.rounds}, (_, i) => {
+    let cls = '';
+    if (i < completedRounds) cls = 'done';
+    else if (i === activeRound) cls = 'active';
+    return `<div class="round-dot ${cls}"></div>`;
+  }).join('');
+}
+
+function toggleTimer() {
+  if (timerPhase === 'done') { resetTimer(); return; }
+  if (!timerRunning) {
+    timerRunning = true;
+    document.getElementById('timer-start-btn').textContent = '⏸ Пауза';
+    if (timerPhase === 'idle') {
+      timerCurrentRound = 0;
+      timerPhase = 'round';
+      timerSecondsLeft = timerState.roundSec;
+    }
+    timerInterval = setInterval(timerTick, 1000);
+  } else {
+    timerRunning = false;
+    clearInterval(timerInterval);
+    document.getElementById('timer-start-btn').textContent = '▶ Продолжить';
+  }
+}
+
+function timerTick() {
+  timerSecondsLeft--;
+  const timeEl = document.getElementById('timer-time');
+  const phaseEl = document.getElementById('timer-phase');
+  const roundEl = document.getElementById('timer-round-label');
+
+  if (timerPhase === 'round') {
+    timeEl.textContent = formatTime(timerSecondsLeft);
+    timeEl.className = 'timer-time running';
+    phaseEl.textContent = `РАУНД ${timerCurrentRound + 1}`;
+    phaseEl.className = 'timer-phase';
+    roundEl.textContent = `Раунд ${timerCurrentRound + 1} из ${timerState.rounds}`;
+    renderRoundDots(timerCurrentRound, timerCurrentRound);
+    if (timerSecondsLeft <= 0) {
+      playBeep('round-end');
+      if (timerCurrentRound + 1 >= timerState.rounds) {
+        timerPhase = 'done';
+        timerRunning = false;
+        clearInterval(timerInterval);
+        timeEl.textContent = '00:00';
+        timeEl.className = 'timer-time';
+        phaseEl.textContent = 'ФИНИШ 🏆';
+        roundEl.textContent = 'Все раунды завершены!';
+        renderRoundDots(timerState.rounds, -1);
+        document.getElementById('timer-start-btn').textContent = '↺ Заново';
+        return;
+      }
+      timerPhase = 'break';
+      timerSecondsLeft = timerState.breakSec;
+    }
+  } else if (timerPhase === 'break') {
+    timeEl.textContent = formatTime(timerSecondsLeft);
+    timeEl.className = 'timer-time break-time';
+    phaseEl.textContent = 'ПЕРЕРЫВ';
+    phaseEl.className = 'timer-phase break-phase';
+    roundEl.textContent = `Следующий: Раунд ${timerCurrentRound + 2}`;
+    renderRoundDots(timerCurrentRound + 1, -1);
+    if (timerSecondsLeft <= 0) {
+      playBeep('break-end');
+      timerCurrentRound++;
+      timerPhase = 'round';
+      timerSecondsLeft = timerState.roundSec;
+    }
+  }
+}
+
+function resetTimer() {
+  timerRunning = false;
+  clearInterval(timerInterval);
+  timerPhase = 'idle';
+  timerCurrentRound = 0;
+  document.getElementById('timer-start-btn').textContent = '▶ Старт';
+  updateTimerDisplay();
+}
+
+function playBeep(type) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.type = type === 'round-end' ? 'sawtooth' : 'sine';
+    osc.frequency.setValueAtTime(type === 'round-end' ? 880 : 440, ctx.currentTime);
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.8);
+    if (type === 'round-end') {
+      const osc2 = ctx.createOscillator();
+      const g2 = ctx.createGain();
+      osc2.connect(g2); g2.connect(ctx.destination);
+      osc2.frequency.setValueAtTime(660, ctx.currentTime + 0.1);
+      g2.gain.setValueAtTime(0.3, ctx.currentTime + 0.1);
+      g2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
+      osc2.start(ctx.currentTime + 0.1);
+      osc2.stop(ctx.currentTime + 0.9);
+    }
+  } catch(e) {}
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+let currentTab = 'groups';
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.tab === tab));
+  document.querySelectorAll('.screen').forEach(el => el.classList.toggle('active', el.id === 'screen-' + tab));
+  
+  const isGroupsList = tab === 'groups' && document.getElementById('groups-list-view').style.display !== 'none';
+  document.getElementById('groups-fab').style.display = isGroupsList ? 'flex' : 'none';
+  
+  // Update topbar title
+  const titles = { groups: 'TORNADO TKD', timer: 'ТАЙМЕР', profile: 'ПРОФИЛЬ' };
+  document.getElementById('topbar-title').textContent = titles[tab] || 'TORNADO TKD';
+  
+  if (tab === 'profile') renderProfile();
+}
+
+// Show FAB on groups tab
+document.querySelector('.nav-item[data-tab="groups"]').addEventListener('click', () => {
+  setTimeout(() => {
+    const isGroupsList = document.getElementById('groups-list-view').style.display !== 'none';
+    document.getElementById('groups-fab').style.display = isGroupsList ? 'flex' : 'none';
+  }, 50);
+});
+
+// ============================================================
+// MODALS
+// ============================================================
+function openModal(id) {
+  document.getElementById(id).classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) closeModal(el.id); });
+});
+
+// ============================================================
+// THEME
+// ============================================================
+function toggleTheme() {
+  const isLight = document.body.classList.toggle('light');
+  localStorage.setItem('tkd-theme', isLight ? 'light' : 'dark');
+  document.querySelector('#topbar-actions .icon-btn').textContent = isLight ? '🌙' : '☀️';
+}
+
+// ============================================================
+// TOAST
+// ============================================================
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ============================================================
+// SHOW FAB INITIALLY
+// ============================================================
+window.addEventListener('DOMContentLoaded', () => {
+  // FAB shown after app loads
+});
+</script>
+</body>
+</html>
