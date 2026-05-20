@@ -491,9 +491,28 @@ async function checkAuth(){
   else document.getElementById('auth-screen').style.display='flex';
 }
 async function loadProfile(){
-  const{data}=await db.from('profiles').select('*').eq('id',currentUser.id).single().catch(()=>({data:null}));
-  if(data&&data.first_name){userProfile=data;showApp();}
-  else{document.getElementById('auth-screen').style.display='none';document.getElementById('onboarding').style.display='flex';}
+  try{
+    const { data, error } = await db
+      .from('profiles')
+      .select('*')
+      .eq('id', currentUser.id)
+      .single();
+
+    if(error || !data){
+      document.getElementById('auth-screen').style.display='none';
+      document.getElementById('onboarding').style.display='flex';
+      return;
+    }
+
+    if(data.first_name){
+      userProfile = data;
+      showApp();
+    }
+
+  }catch(e){
+    console.error(e);
+    alert('Ошибка загрузки профиля: ' + e.message);
+  }
 }
 function showApp(){
   document.getElementById('auth-screen').style.display='none';
