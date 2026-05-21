@@ -1,53 +1,43 @@
-# 🌪️ Tornado TKD
+# Tornado TKD — Digital Journal for Taekwondo Coach
 
-Журнал тренера по тхэквондо — PWA-приложение.
+**Full-stack PWA application** that helps taekwondo coaches manage their clubs efficiently — from attendance tracking to payments and performance analytics.
 
-## Технологии
-- Чистый HTML/CSS/JS (без фреймворков) — максимальная скорость
-- Supabase (PostgreSQL) — база данных в облаке
-- PWA — добавляется на экран телефона
+Built for my own taekwondo club in Shymkent, Kazakhstan. Currently used by the head coach to manage **100+ students**.
 
-## Деплой на Vercel
+### Key Features
 
-1. Создайте репозиторий на GitHub, загрузите оба файла (`index.html`, `manifest.json`)
-2. Зайдите на [vercel.com](https://vercel.com), подключите репозиторий
-3. Vercel автоматически задеплоит приложение (статический сайт, никакого build не нужно)
+- **Group Management** — Create and manage training groups with schedules
+- **Attendance Journal** — Automatic daily attendance sheets with monthly navigation
+- **Payment Tracking** — Full payment history and status for each student
+- **Live Timer** — Customizable round timer with sound alerts for sparring and training
+- **Student Profiles** — Detailed information (name, IIN, contacts, parents' phones)
+- **Analytics & Statistics** — Performance insights, attendance rates, payment statistics, and group activity overview
+- **Dual Coach Access** — Two coaches can work in the same database in real-time
+- **PWA** — Installable on phone (works like a native app) with dark/light theme support
 
-## Настройка Supabase
+### Technologies
 
-1. Создайте проект на [supabase.com](https://supabase.com)
-2. Перейдите в **SQL Editor** и выполните SQL из раздела «Настройка» в приложении
-3. Скопируйте **Project URL** и **anon key** из Settings → API
-4. Введите их при первом запуске приложения
+- **Frontend**: Vanilla HTML, CSS, JavaScript (no heavy frameworks — maximum performance and lightweight)
+- **Backend/Database**: Supabase (PostgreSQL + Auth)
+- **PWA**: Progressive Web App — can be added to home screen on both iOS and Android
+- **Deployment**: Vercel
 
-## Добавление на экран телефона
+### Why I Built It
 
-### iPhone (Safari):
-- Откройте сайт в Safari
-- Нажмите кнопку «Поделиться» (квадрат со стрелкой вверх)
-- Выберите «На экран «Домой»»
+Instead of using paper journals and Excel files, I created a convenient digital tool that saves the coach dozens of hours per month and gives clear data insights about the club's performance.
 
-### Android (Chrome):
-- Откройте сайт в Chrome
-- Нажмите меню (три точки)
-- Выберите «Добавить на главный экран»
+### Screenshots
 
-## Функции
 
-- 🥋 **Группы** — создание групп с расписанием, добавление учеников
-- 📋 **Журнал посещений** — автоматически генерируется по дням группы, листается по месяцам
-- ✅ **Статусы**: Пришёл / Не пришёл / Уважительная / Болезнь / Соревнование
-- 💳 **Оплата** — история оплаты по месяцам для каждого ученика
-- ⏱ **Таймер** — настройка раундов, длительности, перерывов, звуковые сигналы
-- 👤 **Профиль** — для двух тренеров с общим доступом к данным
-- 🌙 **Dark/Light** — переключатель темы
+### Live Demo
+https://tornado-tkd.vercel.app
 
-## Структура учеников
-- ФИО (Фамилия, Имя, Отчество)
-- ИИН
-- Личный телефон
-- Телефон родителей
+### How to Run Locally / Deploy
 
-## Два тренера
-Оба тренера регистрируются через форму в приложении.
-Данные хранятся в общей базе Supabase — оба видят все группы в реальном времени.
+1. Clone the repository
+2. Create a new project on [Supabase](https://supabase.com)
+3. Run the SQL setup script (located in the app)
+4. Add your Supabase URL and anon key
+5. Deploy instantly on Vercel (static hosting)
+
+---
