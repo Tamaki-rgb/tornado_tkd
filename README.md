@@ -1,43 +1,36 @@
-# Tornado TKD — Digital Journal for Taekwondo Coach
+# Tornado TKD — Digital Taekwondo Coach Journal
 
-**Full-stack PWA application** that helps taekwondo coaches manage their clubs efficiently — from attendance tracking to payments and performance analytics.
+**Full-stack Progressive Web Application (PWA)** developed to help taekwondo coaches professionally manage their clubs.
 
-Built for my own taekwondo club in Shymkent, Kazakhstan. Currently used by the head coach to manage **100+ students**.
+Currently used by the head coach of Tornado Taekwondo Club in Shymkent, Kazakhstan to manage **100+ active students**.
 
 ### Key Features
 
-- **Group Management** — Create and manage training groups with schedules
-- **Attendance Journal** — Automatic daily attendance sheets with monthly navigation
-- **Payment Tracking** — Full payment history and status for each student
-- **Live Timer** — Customizable round timer with sound alerts for sparring and training
-- **Student Profiles** — Detailed information (name, IIN, contacts, parents' phones)
-- **Analytics & Statistics** — Performance insights, attendance rates, payment statistics, and group activity overview
-- **Dual Coach Access** — Two coaches can work in the same database in real-time
-- **PWA** — Installable on phone (works like a native app) with dark/light theme support
+- Group and schedule management
+- Automatic attendance journal with monthly navigation
+- Payment history and tracking for each student
+- **Analytics & Statistics** — attendance rates, payment statistics, group performance insights
+- Customizable sparring/training timer with sound alerts
+- Detailed student profiles (FIO, IIN, contacts, parents' phones)
+- Real-time access for two coaches working in the same database
+- Dark/Light theme + fully installable PWA
 
 ### Technologies
 
-- **Frontend**: Vanilla HTML, CSS, JavaScript (no heavy frameworks — maximum performance and lightweight)
-- **Backend/Database**: Supabase (PostgreSQL + Auth)
-- **PWA**: Progressive Web App — can be added to home screen on both iOS and Android
+- **Frontend**: Pure HTML, CSS, JavaScript (Vanilla JS) — maximum speed and lightweight
+- **Backend**: Supabase (PostgreSQL + Authentication)
+- **PWA**: Installable on iOS and Android
 - **Deployment**: Vercel
 
-### Why I Built It
-
-Instead of using paper journals and Excel files, I created a convenient digital tool that saves the coach dozens of hours per month and gives clear data insights about the club's performance.
+**Note**: The user interface is in Russian as the application is actively used by the local club. Code and documentation are in English.
 
 ### Screenshots
 
+(сюда вставишь картинки)
 
-### Live Demo
-https://tornado-tkd.vercel.app
+### Live
+[https://tornado-tkd.vercel.app](https://tornado-tkd.vercel.app)
 
-### How to Run Locally / Deploy
+### Why This Project Matters
 
-1. Clone the repository
-2. Create a new project on [Supabase](https://supabase.com)
-3. Run the SQL setup script (located in the app)
-4. Add your Supabase URL and anon key
-5. Deploy instantly on Vercel (static hosting)
-
----
+Instead of paper journals and chaotic Excel files, I built a modern tool that saves dozens of hours per month and gives the coach clear data-driven insights about the club.
