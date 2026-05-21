@@ -26,7 +26,10 @@ Currently used by the head coach of Tornado Taekwondo Club in Shymkent, Kazakhst
 
 ### Screenshots
 
-(сюда вставишь картинки)
+![Main Dashboard](screenshots/main.png)
+![Attendance Journal](screenshots/attendance.png)
+![Analytics](screenshots/analytics.png)
+![Timer](screenshots/timer.png)
 
 ### Live
 [https://tornado-tkd.vercel.app](https://tornado-tkd.vercel.app)
