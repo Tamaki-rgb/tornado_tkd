@@ -479,10 +479,28 @@ async function checkAuth(){
   if(session){currentUser=session.user;await loadProfile();}
   else document.getElementById('auth-screen').style.display='flex';
 }
-async function loadProfile(){
-  const{data}=await db.from('profiles').select('*').eq('id',currentUser.id).single().catch(()=>({data:null}));
-  if(data&&data.first_name){userProfile=data;showApp();}
-  else{document.getElementById('auth-screen').style.display='none';document.getElementById('onboarding').style.display='flex';}
+async function loadProfile() {
+    try {
+        const { data, error } = await db
+            .from('profiles')
+            .select('*')
+            .eq('id', currentUser.id)
+            .single();
+
+        if (!error && data && data.first_name) {
+            userProfile = data;
+            showApp();
+        } else {
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('onboarding').style.display = 'flex';
+        }
+
+    } catch (e) {
+        console.error('Ошибка загрузки профиля:', e);
+
+        document.getElementById('auth-screen').style.display = 'none';
+        document.getElementById('onboarding').style.display = 'flex';
+    }
 }
 function showApp(){
   document.getElementById('auth-screen').style.display='none';
