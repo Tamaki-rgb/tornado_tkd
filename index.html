@@ -1,0 +1,966 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#E53E3E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tornado TKD">
+<title>Tornado TKD</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--red:#E53E3E;--red-dark:#C53030;--bg:#0a0a0a;--bg2:#141414;--bg3:#1e1e1e;--bg4:#282828;--text:#f2f2f2;--text2:#888;--border:#2a2a2a;--green:#48BB78;--orange:#ED8936;--blue:#63B3ED;--purple:#9F7AEA;--yellow:#ECC94B;--radius:16px;--shadow:0 8px 32px rgba(0,0,0,.5);--glow:0 0 20px rgba(229,62,62,.3);}
+.light{--bg:#f0f0f0;--bg2:#fff;--bg3:#e8e8e8;--bg4:#ddd;--text:#0a0a0a;--text2:#666;--border:#d0d0d0;--shadow:0 4px 20px rgba(0,0,0,.08);}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:'Nunito',sans-serif;font-size:15px;transition:background .3s,color .3s;}
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+#app{display:flex;flex-direction:column;height:100vh;height:100dvh;}
+#topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 16px 10px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;min-height:58px;position:relative;}
+#topbar::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--red),transparent);opacity:.5;}
+#topbar-title{font-family:'Bebas Neue',cursive;font-size:28px;color:var(--red);letter-spacing:2px;text-shadow:0 0 20px rgba(229,62,62,.4);}
+#topbar-actions{display:flex;gap:8px;}
+.icon-btn{background:var(--bg3);border:1px solid var(--border);border-radius:10px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);font-size:17px;transition:all .2s;}
+.icon-btn:active{background:var(--red);color:#fff;border-color:var(--red);transform:scale(.92);}
+#content{flex:1;overflow-y:auto;overflow-x:hidden;}
+#navbar{background:var(--bg2);border-top:1px solid var(--border);display:flex;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom,0);position:relative;}
+#navbar::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--red),transparent);opacity:.4;}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 0 8px;cursor:pointer;border:none;background:none;color:var(--text2);font-family:'Nunito',sans-serif;font-size:10px;font-weight:800;transition:color .2s;gap:4px;text-transform:uppercase;letter-spacing:.8px;position:relative;}
+.nav-item .ni{font-size:23px;transition:transform .2s;}
+.nav-item.active{color:var(--red);}
+.nav-item.active .ni{transform:scale(1.2);filter:drop-shadow(0 0 6px rgba(229,62,62,.6));}
+.nav-item.active::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:32px;height:2px;background:var(--red);border-radius:0 0 4px 4px;box-shadow:var(--glow);}
+.screen{display:none;padding:16px;min-height:100%;animation:fadeUp .25s ease;}
+.screen.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+.hero{background:linear-gradient(135deg,#1a0000 0%,#2d0000 40%,#1a0a0a 100%);border-radius:var(--radius);padding:20px;margin-bottom:16px;border:1px solid rgba(229,62,62,.3);position:relative;overflow:hidden;}
+.hero::before{content:'🌪️';position:absolute;right:-10px;top:50%;transform:translateY(-50%);font-size:90px;opacity:.07;line-height:1;}
+.hero::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--red),transparent);}
+.hero-title{font-family:'Bebas Neue',cursive;font-size:32px;color:#fff;letter-spacing:2px;line-height:1;margin-bottom:3px;}
+.hero-sub{font-size:11px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1.5px;}
+.hero-stats{display:flex;gap:20px;margin-top:14px;}
+.h-num{font-family:'Bebas Neue',cursive;font-size:30px;color:var(--red);line-height:1;}
+.h-lbl{font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.5px;}
+.sec-title{font-family:'Bebas Neue',cursive;font-size:18px;letter-spacing:1px;color:var(--text);margin-bottom:12px;display:flex;align-items:center;gap:8px;}
+.sec-title::before{content:'';width:3px;height:18px;background:var(--red);border-radius:2px;display:inline-block;box-shadow:0 0 8px rgba(229,62,62,.5);}
+
+/* ANALYTICS */
+.analytics-cards{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.an-card{background:var(--bg2);border-radius:14px;padding:14px;border:1px solid var(--border);position:relative;overflow:hidden;}
+.an-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.an-card.red::before{background:var(--red);}
+.an-card.green::before{background:var(--green);}
+.an-card.orange::before{background:var(--orange);}
+.an-card.blue::before{background:var(--blue);}
+.an-num{font-family:'Bebas Neue',cursive;font-size:32px;line-height:1;margin-bottom:3px;}
+.an-card.red .an-num{color:var(--red);}
+.an-card.green .an-num{color:var(--green);}
+.an-card.orange .an-num{color:var(--orange);}
+.an-card.blue .an-num{color:var(--blue);}
+.an-lbl{font-size:11px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+.rating-list{background:var(--bg2);border-radius:14px;border:1px solid var(--border);overflow:hidden;margin-bottom:12px;}
+.rating-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--border);}
+.rating-row:last-child{border-bottom:none;}
+.r-rank{font-family:'Bebas Neue',cursive;font-size:18px;width:24px;text-align:center;color:var(--text2);}
+.r-rank.gold{color:var(--yellow);}
+.r-rank.silver{color:#aaa;}
+.r-rank.bronze{color:var(--orange);}
+.r-name{flex:1;font-weight:700;font-size:13px;}
+.r-bar-wrap{width:80px;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+.r-bar{height:100%;border-radius:3px;}
+.r-pct{font-family:'Bebas Neue',cursive;font-size:16px;min-width:38px;text-align:right;}
+.attend-chart{background:var(--bg2);border-radius:14px;border:1px solid var(--border);padding:14px;margin-bottom:12px;}
+.chart-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.chart-row:last-child{margin-bottom:0;}
+.chart-name{font-size:12px;font-weight:800;width:90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0;}
+/* Gold champion style */
+.chart-row.champion .chart-name{color:var(--yellow);text-shadow:0 0 8px rgba(236,201,75,.6);}
+.chart-row.champion .chart-bar-wrap{border:1px solid rgba(236,201,75,.4);border-radius:7px;}
+.chart-bar-wrap{flex:1;height:20px;background:var(--bg3);border-radius:6px;overflow:hidden;position:relative;}
+.chart-bar{height:100%;border-radius:6px;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;min-width:28px;}
+.chart-bar span{font-size:10px;font-weight:800;color:#fff;}
+
+.group-card{background:var(--bg2);border-radius:var(--radius);margin-bottom:12px;border:1px solid var(--border);cursor:pointer;transition:all .2s;overflow:hidden;box-shadow:var(--shadow);position:relative;}
+.group-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--red);box-shadow:2px 0 12px rgba(229,62,62,.4);}
+.group-card:active{transform:scale(.98);border-color:rgba(229,62,62,.4);}
+.gc-inner{padding:14px 14px 14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.g-name{font-weight:900;font-size:16px;margin-bottom:4px;}
+.g-time{font-size:13px;color:var(--red);font-weight:700;margin-bottom:5px;}
+.dpill{display:inline-block;padding:3px 7px;border-radius:6px;font-size:10px;font-weight:800;margin:1px;text-transform:uppercase;}
+.dpill.on{background:rgba(229,62,62,.15);color:var(--red);border:1px solid rgba(229,62,62,.3);}
+.dpill.off{background:var(--bg3);color:var(--text2);border:1px solid var(--border);}
+.g-badge{background:linear-gradient(135deg,var(--red),var(--red-dark));color:#fff;border-radius:12px;padding:6px 12px;font-size:13px;font-weight:900;white-space:nowrap;box-shadow:0 4px 12px rgba(229,62,62,.3);flex-shrink:0;}
+.s-row{background:var(--bg2);border-radius:12px;padding:12px 14px;margin-bottom:8px;border:1px solid var(--border);display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s;position:relative;}
+.s-row::after{content:'›';position:absolute;right:14px;color:var(--text2);font-size:20px;}
+.s-row:active{border-color:var(--red);}
+.s-av{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--red-dark));display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;color:#fff;flex-shrink:0;box-shadow:0 4px 12px rgba(229,62,62,.3);}
+.s-name{font-weight:800;font-size:14px;margin-bottom:3px;}
+.s-meta{font-size:12px;color:var(--text2);}
+.btn{border:none;border-radius:12px;padding:13px 20px;font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:8px;justify-content:center;}
+.btn-primary{background:linear-gradient(135deg,var(--red),var(--red-dark));color:#fff;box-shadow:0 4px 16px rgba(229,62,62,.35);}
+.btn-primary:active{transform:scale(.97);}
+.btn-secondary{background:var(--bg3);color:var(--text);border:1px solid var(--border);}
+.btn-secondary:active{background:var(--bg4);}
+.btn-danger{background:rgba(229,62,62,.1);color:var(--red);border:1px solid rgba(229,62,62,.3);}
+.btn-block{width:100%;}
+.btn-sm{padding:8px 14px;font-size:13px;border-radius:8px;}
+.fab{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom,0));right:20px;width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--red-dark));color:#fff;font-size:30px;border:none;cursor:pointer;box-shadow:0 6px 24px rgba(229,62,62,.5);display:flex;align-items:center;justify-content:center;transition:transform .2s;z-index:50;}
+.fab:active{transform:scale(.92);}
+.form-group{margin-bottom:14px;}
+.form-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;color:var(--text2);margin-bottom:7px;display:block;}
+.form-input{width:100%;background:var(--bg3);border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;color:var(--text);font-family:'Nunito',sans-serif;font-size:15px;outline:none;transition:border-color .2s,box-shadow .2s;}
+.form-input:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(229,62,62,.1);}
+.days-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+.day-btn{background:var(--bg3);border:1.5px solid var(--border);border-radius:10px;padding:9px 0;text-align:center;font-size:11px;font-weight:800;cursor:pointer;color:var(--text2);transition:all .15s;}
+.day-btn.selected{background:var(--red);border-color:var(--red);color:#fff;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:100;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(4px);}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--bg2);border-radius:24px 24px 0 0;width:100%;max-height:92vh;overflow-y:auto;padding:20px 16px 32px;transform:translateY(100%);transition:transform .3s cubic-bezier(.34,1.56,.64,1);border-top:1px solid var(--border);}
+.modal-overlay.open .modal{transform:none;}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px;}
+.modal-title{font-family:'Bebas Neue',cursive;font-size:24px;color:var(--red);margin-bottom:18px;letter-spacing:1px;}
+.j-nav{display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border-radius:12px;padding:10px 14px;margin-bottom:12px;border:1px solid var(--border);}
+.month-lbl{font-family:'Bebas Neue',cursive;font-size:20px;letter-spacing:1px;}
+.j-wrap{overflow-x:auto;margin-bottom:14px;border-radius:12px;border:1px solid var(--border);}
+.j-table{border-collapse:collapse;width:100%;min-width:480px;}
+.j-table th{background:var(--bg3);padding:8px 5px;font-size:10px;font-weight:800;text-transform:uppercase;color:var(--text2);text-align:center;border-bottom:1px solid var(--border);border-right:1px solid var(--border);}
+.j-table th.nth{text-align:left;min-width:120px;padding-left:12px;}
+.j-table td{border-bottom:1px solid var(--border);border-right:1px solid var(--border);text-align:center;padding:5px 3px;background:var(--bg2);vertical-align:middle;}
+.j-table td.ntd{text-align:left;padding-left:12px;font-weight:700;font-size:13px;white-space:nowrap;cursor:pointer;}
+.j-table tr:last-child td{border-bottom:none;}
+.st-btn{width:30px;height:30px;border-radius:8px;border:none;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;margin:0 auto;transition:transform .15s;background:var(--bg3);}
+.st-btn:active{transform:scale(.8);}
+.st-btn.present{background:rgba(72,187,120,.15);}
+.st-btn.absent{background:rgba(229,62,62,.15);}
+.st-btn.excused{background:rgba(99,179,237,.15);}
+.st-btn.sick{background:rgba(159,122,234,.15);}
+.st-btn.competition{background:rgba(236,201,75,.15);}
+.st-btn.wrongday{background:rgba(100,100,100,.15);}
+.pay-btn{padding:4px 9px;border-radius:20px;border:none;cursor:pointer;font-size:10px;font-weight:800;font-family:'Nunito',sans-serif;transition:all .2s;white-space:nowrap;}
+.pay-btn.paid{background:rgba(72,187,120,.15);color:var(--green);}
+.pay-btn.unpaid{background:var(--bg3);color:var(--text2);border:1px solid var(--border);}
+.t-display{text-align:center;padding:36px 20px;background:linear-gradient(180deg,#1a0000 0%,#0a0a0a 100%);border-radius:20px;border:1px solid rgba(229,62,62,.2);margin-bottom:16px;position:relative;overflow:hidden;}
+.t-display::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 30%,rgba(229,62,62,.12) 0%,transparent 65%);}
+.t-display::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--red),transparent);}
+.t-phase{font-family:'Bebas Neue',cursive;font-size:13px;letter-spacing:4px;color:var(--text2);margin-bottom:6px;}
+.t-phase.brk{color:var(--orange);}
+.t-time{font-family:'Bebas Neue',cursive;font-size:96px;line-height:1;color:var(--text);letter-spacing:4px;transition:color .3s;}
+.t-time.run{color:var(--red);text-shadow:0 0 30px rgba(229,62,62,.4);}
+.t-time.brk{color:var(--orange);text-shadow:0 0 30px rgba(237,137,54,.4);}
+.rdots{display:flex;gap:8px;justify-content:center;margin-top:14px;flex-wrap:wrap;}
+.rdot{width:10px;height:10px;border-radius:50%;background:var(--bg4);transition:all .3s;}
+.rdot.done{background:var(--green);box-shadow:0 0 8px rgba(72,187,120,.5);}
+.rdot.curr{background:var(--red);box-shadow:0 0 10px rgba(229,62,62,.7);transform:scale(1.3);}
+.t-settings{background:var(--bg2);border-radius:var(--radius);padding:16px;border:1px solid var(--border);margin-bottom:14px;}
+.t-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
+.t-row:last-child{border-bottom:none;padding-bottom:0;}
+.t-lbl{font-weight:800;font-size:14px;}
+.t-sub{font-size:11px;color:var(--text2);margin-top:2px;}
+.counter{display:flex;align-items:center;gap:10px;}
+.c-btn{width:36px;height:36px;border-radius:10px;background:var(--bg3);border:1px solid var(--border);font-size:20px;cursor:pointer;color:var(--text);display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.c-btn:active{background:var(--red);color:#fff;border-color:var(--red);transform:scale(.9);}
+.c-val{font-family:'Bebas Neue',cursive;font-size:26px;min-width:42px;text-align:center;}
+.t-btns{display:flex;gap:10px;}
+.t-btns .btn{flex:1;padding:16px;font-size:16px;border-radius:14px;}
+.p-hero{background:linear-gradient(135deg,#1a0000,#2d0000 60%,#1a0a0a);border-radius:var(--radius);padding:24px 20px;margin-bottom:14px;border:1px solid rgba(229,62,62,.2);text-align:center;position:relative;overflow:hidden;}
+.p-hero::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--red),transparent);}
+.p-av{width:86px;height:86px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--red-dark));display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',cursive;font-size:34px;color:#fff;border:3px solid rgba(229,62,62,.4);overflow:hidden;cursor:pointer;margin:0 auto 12px;box-shadow:0 8px 24px rgba(229,62,62,.3);}
+.p-av img{width:100%;height:100%;object-fit:cover;}
+.p-av-wrap{position:relative;display:inline-block;margin-bottom:12px;}
+.p-av-edit{position:absolute;bottom:2px;right:2px;width:24px;height:24px;border-radius:50%;background:var(--red);border:2px solid var(--bg2);display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;}
+.p-name{font-family:'Bebas Neue',cursive;font-size:28px;letter-spacing:1px;color:#fff;}
+.p-role{font-size:12px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:1px;margin-top:3px;}
+.stats-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;}
+.stat-box{background:var(--bg2);border-radius:12px;padding:14px 10px;text-align:center;border:1px solid var(--border);}
+.stat-num{font-family:'Bebas Neue',cursive;font-size:30px;color:var(--red);line-height:1;}
+.stat-lbl{font-size:10px;color:var(--text2);font-weight:800;text-transform:uppercase;letter-spacing:.5px;margin-top:3px;}
+.card{background:var(--bg2);border-radius:var(--radius);padding:16px;margin-bottom:12px;border:1px solid var(--border);}
+.back-btn{display:flex;align-items:center;gap:8px;background:none;border:none;color:var(--text2);font-family:'Nunito',sans-serif;font-weight:800;font-size:14px;cursor:pointer;margin-bottom:16px;padding:4px 0;transition:color .2s;}
+.back-btn:active{color:var(--red);}
+.empty-state{text-align:center;padding:48px 20px;}
+.empty-icon{font-size:60px;margin-bottom:14px;opacity:.6;}
+.empty-title{font-family:'Bebas Neue',cursive;font-size:22px;color:var(--text2);margin-bottom:6px;}
+.empty-sub{font-size:13px;color:var(--text2);}
+.toast{position:fixed;bottom:calc(88px + env(safe-area-inset-bottom,0));left:50%;transform:translateX(-50%) translateY(16px);background:var(--bg4);color:var(--text);padding:10px 20px;border-radius:20px;font-size:13px;font-weight:700;z-index:200;opacity:0;transition:all .3s;white-space:nowrap;border:1px solid var(--border);box-shadow:var(--shadow);}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+#auth-screen{position:fixed;inset:0;background:var(--bg);z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;background-image:radial-gradient(ellipse at 50% 0%,rgba(229,62,62,.08) 0%,transparent 60%);}
+.auth-logo{font-family:'Bebas Neue',cursive;font-size:52px;color:var(--red);letter-spacing:3px;text-shadow:0 0 30px rgba(229,62,62,.4);}
+.auth-tag{font-size:12px;color:var(--text2);margin-bottom:36px;text-transform:uppercase;letter-spacing:2px;}
+.auth-form{width:100%;max-width:360px;}
+.auth-tabs{display:flex;background:var(--bg3);border-radius:12px;padding:3px;margin-bottom:20px;}
+.auth-tab{flex:1;padding:10px;border-radius:10px;border:none;background:none;font-family:'Nunito',sans-serif;font-weight:800;font-size:13px;cursor:pointer;color:var(--text2);transition:all .2s;}
+.auth-tab.active{background:var(--bg2);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,.3);}
+#onboarding{position:fixed;inset:0;background:var(--bg);z-index:300;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;text-align:center;background-image:radial-gradient(ellipse at 50% 0%,rgba(229,62,62,.08) 0%,transparent 60%);}
+#supabase-config{position:fixed;inset:0;background:var(--bg);z-index:400;padding:40px 20px;overflow-y:auto;}
+.cfg-logo{font-family:'Bebas Neue',cursive;font-size:36px;color:var(--red);margin-bottom:4px;}
+.step-row{display:flex;align-items:flex-start;gap:12px;margin-bottom:18px;}
+.step-num{background:var(--red);color:#fff;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex-shrink:0;margin-top:2px;}
+.code-block{background:var(--bg3);border-radius:10px;padding:12px;font-size:10px;font-family:monospace;color:var(--text2);margin:8px 0;overflow-x:auto;white-space:pre;border:1px solid var(--border);line-height:1.6;}
+.pay-chips{display:flex;flex-wrap:wrap;gap:8px;}
+.pay-chip{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:800;cursor:pointer;transition:all .2s;border:2px solid;}
+.pay-chip.paid{background:rgba(72,187,120,.1);color:var(--green);border-color:var(--green);}
+.pay-chip.unpaid{background:var(--bg3);color:var(--text2);border-color:var(--border);}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);}
+.info-row:last-child{border-bottom:none;}
+.info-lbl{font-size:12px;color:var(--text2);font-weight:700;}
+.info-val{font-weight:800;font-size:14px;text-align:right;}
+</style>
+</head>
+<body>
+
+<div id="supabase-config">
+  <div class="cfg-logo">⚡ TORNADO TKD</div>
+  <p style="color:var(--text2);font-size:13px;margin-bottom:24px;line-height:1.6">Подключите базу данных Supabase</p>
+  <div class="step-row"><div class="step-num">1</div><div><b>Создайте проект на supabase.com</b><div style="font-size:13px;color:var(--text2);margin-top:3px">Бесплатный аккаунт → New Project</div></div></div>
+  <div class="step-row"><div class="step-num">2</div><div><b>SQL Editor → New query → Run:</b>
+  <div class="code-block">create table profiles (
+  id uuid references auth.users primary key,
+  first_name text, last_name text, avatar_url text,
+  created_at timestamptz default now()
+);
+create table groups (
+  id uuid primary key default gen_random_uuid(),
+  name text not null, days int[] not null, time text,
+  created_at timestamptz default now()
+);
+create table students (
+  id uuid primary key default gen_random_uuid(),
+  group_id uuid references groups(id) on delete cascade,
+  first_name text, last_name text, middle_name text,
+  iin text, phone text, parent_phone text,
+  created_at timestamptz default now()
+);
+create table attendance (
+  id uuid primary key default gen_random_uuid(),
+  student_id uuid references students(id) on delete cascade,
+  date date not null, status text default 'none',
+  unique(student_id, date)
+);
+create table payments (
+  id uuid primary key default gen_random_uuid(),
+  student_id uuid references students(id) on delete cascade,
+  year int, month int, paid boolean default false,
+  unique(student_id, year, month)
+);
+alter table profiles enable row level security;
+alter table groups enable row level security;
+alter table students enable row level security;
+alter table attendance enable row level security;
+alter table payments enable row level security;
+create policy "auth" on profiles for all using (auth.role()='authenticated');
+create policy "auth" on groups for all using (auth.role()='authenticated');
+create policy "auth" on students for all using (auth.role()='authenticated');
+create policy "auth" on attendance for all using (auth.role()='authenticated');
+create policy "auth" on payments for all using (auth.role()='authenticated');</div></div></div>
+  <div class="step-row"><div class="step-num">3</div><div><b style="display:block;margin-bottom:10px">Settings → API → введите ключи:</b>
+    <div class="form-group"><label class="form-label">Project URL</label><input class="form-input" id="cfg-url" placeholder="https://xxxx.supabase.co" type="url"></div>
+    <div class="form-group"><label class="form-label">Anon Key (вкладка Legacy, строка anon public)</label><input class="form-input" id="cfg-key" placeholder="eyJhbGciOiJIUzI1NiIs..."></div>
+    <button class="btn btn-primary btn-block" onclick="saveConfig()">Подключить →</button>
+  </div></div>
+</div>
+
+<div id="auth-screen" style="display:none">
+  <div style="font-size:52px;margin-bottom:10px">🌪️</div>
+  <div class="auth-logo">TORNADO TKD</div>
+  <div class="auth-tag">Тхэквондо · Журнал тренера</div>
+  <div class="auth-form">
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Войти</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')">Регистрация</button>
+    </div>
+    <div id="auth-login">
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="login-email" type="email" placeholder="coach@tornado.kz"></div>
+      <div class="form-group"><label class="form-label">Пароль</label><input class="form-input" id="login-pass" type="password" placeholder="••••••••"></div>
+      <button class="btn btn-primary btn-block" onclick="doLogin()">Войти</button>
+    </div>
+    <div id="auth-register" style="display:none">
+      <div class="form-group"><label class="form-label">Имя</label><input class="form-input" id="reg-fname" type="text" placeholder="Иван"></div>
+      <div class="form-group"><label class="form-label">Фамилия</label><input class="form-input" id="reg-lname" type="text" placeholder="Иванов"></div>
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="reg-email" type="email" placeholder="coach@tornado.kz"></div>
+      <div class="form-group"><label class="form-label">Пароль</label><input class="form-input" id="reg-pass" type="password" placeholder="Минимум 6 символов"></div>
+      <button class="btn btn-primary btn-block" onclick="doRegister()">Создать аккаунт</button>
+    </div>
+    <p style="text-align:center;margin-top:14px;font-size:12px;color:var(--text2)"><span style="cursor:pointer;text-decoration:underline" onclick="resetConfig()">Изменить подключение</span></p>
+  </div>
+</div>
+
+<div id="onboarding" style="display:none">
+  <div style="font-size:60px;margin-bottom:12px">🌪️</div>
+  <div style="font-family:'Bebas Neue',cursive;font-size:44px;color:var(--red);letter-spacing:2px;margin-bottom:4px">TORNADO TKD</div>
+  <div style="font-size:13px;color:var(--text2);margin-bottom:36px;text-transform:uppercase;letter-spacing:1px">Настройте профиль тренера</div>
+  <div style="width:100%;max-width:360px">
+    <div class="form-group"><label class="form-label">Имя</label><input class="form-input" id="ob-fname" type="text" placeholder="Иван"></div>
+    <div class="form-group"><label class="form-label">Фамилия</label><input class="form-input" id="ob-lname" type="text" placeholder="Иванов"></div>
+    <button class="btn btn-primary btn-block" onclick="saveProfile()">Начать работу 🥋</button>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+  <div id="topbar">
+    <div id="topbar-title">TORNADO TKD</div>
+    <div id="topbar-actions">
+      <button class="icon-btn" id="theme-btn" onclick="toggleTheme()">☀️</button>
+      <button class="icon-btn" onclick="doLogout()">🚪</button>
+    </div>
+  </div>
+  <div id="content">
+    <div id="screen-groups" class="screen active">
+      <div id="view-list">
+        <div id="groups-hero"></div>
+        <div class="sec-title">Группы</div>
+        <div id="groups-cont"></div>
+      </div>
+      <div id="view-detail" style="display:none">
+        <button class="back-btn" onclick="showList()">← Все группы</button>
+        <div id="detail-cont"></div>
+      </div>
+      <div id="view-student" style="display:none">
+        <button class="back-btn" onclick="backToGroup()">← Назад</button>
+        <div id="student-cont"></div>
+      </div>
+    </div>
+    <div id="screen-timer" class="screen">
+      <div class="t-display">
+        <div class="t-phase" id="t-phase">ГОТОВ К БОЮ</div>
+        <div class="t-time" id="t-time">00:00</div>
+        <div id="t-rlbl" style="font-size:13px;color:var(--text2);margin-top:8px;position:relative;z-index:1"></div>
+        <div class="rdots" id="rdots"></div>
+      </div>
+      <div class="t-settings">
+        <div class="t-row"><div><div class="t-lbl">Раунды</div></div><div class="counter"><button class="c-btn" onclick="adj('rounds',-1)">−</button><div class="c-val" id="tv-rounds">3</div><button class="c-btn" onclick="adj('rounds',1)">+</button></div></div>
+        <div class="t-row"><div><div class="t-lbl">Длительность раунда</div><div class="t-sub" id="tv-rlbl">2 мин 0 сек</div></div><div class="counter"><button class="c-btn" onclick="adj('roundSec',-15)">−</button><div class="c-val" id="tv-rsec" style="font-size:17px">120с</div><button class="c-btn" onclick="adj('roundSec',15)">+</button></div></div>
+        <div class="t-row"><div><div class="t-lbl">Перерыв</div><div class="t-sub" id="tv-blbl">1 мин 0 сек</div></div><div class="counter"><button class="c-btn" onclick="adj('breakSec',-15)">−</button><div class="c-val" id="tv-bsec" style="font-size:17px">60с</div><button class="c-btn" onclick="adj('breakSec',15)">+</button></div></div>
+      </div>
+      <div class="t-btns">
+        <button class="btn btn-secondary" onclick="resetTimer()">↺ Сброс</button>
+        <button class="btn btn-primary" id="t-start-btn" onclick="toggleTimer()">▶ Старт</button>
+      </div>
+    </div>
+    <div id="screen-profile" class="screen">
+      <div class="p-hero">
+        <div class="p-av-wrap">
+          <div class="p-av" id="p-av" onclick="document.getElementById('av-file').click()"></div>
+          <div class="p-av-edit">✏️</div>
+        </div>
+        <input type="file" id="av-file" accept="image/*" style="display:none" onchange="handleAvatar(event)">
+        <div class="p-name" id="p-name">—</div>
+        <div class="p-role">Тренер · Tornado TKD</div>
+      </div>
+      <div class="stats-row">
+        <div class="stat-box"><div class="stat-num" id="st-g">0</div><div class="stat-lbl">Групп</div></div>
+        <div class="stat-box"><div class="stat-num" id="st-s">0</div><div class="stat-lbl">Учеников</div></div>
+        <div class="stat-box"><div class="stat-num" id="st-t">0</div><div class="stat-lbl">Сегодня</div></div>
+      </div>
+      <div class="card">
+        <div class="sec-title" style="margin-bottom:14px">Редактировать</div>
+        <div class="form-group"><label class="form-label">Имя</label><input class="form-input" id="edit-fname" type="text"></div>
+        <div class="form-group"><label class="form-label">Фамилия</label><input class="form-input" id="edit-lname" type="text"></div>
+        <button class="btn btn-primary btn-block" onclick="updateProfile()">Сохранить</button>
+      </div>
+    </div>
+  </div>
+  <nav id="navbar">
+    <button class="nav-item active" data-tab="groups" onclick="switchTab('groups')"><span class="ni">🥋</span><span>Группы</span></button>
+    <button class="nav-item" data-tab="timer" onclick="switchTab('timer')"><span class="ni">⏱</span><span>Таймер</span></button>
+    <button class="nav-item" data-tab="profile" onclick="switchTab('profile')"><span class="ni">👤</span><span>Профиль</span></button>
+  </nav>
+</div>
+
+<button class="fab" id="fab" style="display:none" onclick="openAddGroup()">+</button>
+<div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="modal-group">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="mg-title">Новая группа</div>
+    <input type="hidden" id="eg-id">
+    <div class="form-group"><label class="form-label">Название</label><input class="form-input" id="g-name" placeholder="Новички, Взрослые..."></div>
+    <div class="form-group"><label class="form-label">Время</label><input class="form-input" id="g-time" type="time" value="18:00"></div>
+    <div class="form-group"><label class="form-label">Дни занятий</label>
+      <div class="days-grid" id="days-picker">
+        <div class="day-btn" data-day="1">Пн</div><div class="day-btn" data-day="2">Вт</div>
+        <div class="day-btn" data-day="3">Ср</div><div class="day-btn" data-day="4">Чт</div>
+        <div class="day-btn" data-day="5">Пт</div><div class="day-btn" data-day="6">Сб</div>
+        <div class="day-btn" data-day="0">Вс</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-secondary" style="flex:1" onclick="closeModal('modal-group')">Отмена</button>
+      <button class="btn btn-primary" style="flex:1" onclick="saveGroup()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-student">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="ms-title">Добавить ученика</div>
+    <input type="hidden" id="es-id">
+    <div class="form-group"><label class="form-label">Фамилия</label><input class="form-input" id="s-lname" placeholder="Иванов"></div>
+    <div class="form-group"><label class="form-label">Имя</label><input class="form-input" id="s-fname" placeholder="Иван"></div>
+    <div class="form-group"><label class="form-label">Отчество</label><input class="form-input" id="s-mname" placeholder="Необязательно"></div>
+    <div class="form-group"><label class="form-label">ИИН</label><input class="form-input" id="s-iin" placeholder="000000000000" maxlength="12" inputmode="numeric"></div>
+    <div class="form-group"><label class="form-label">Личный телефон</label><input class="form-input" id="s-phone" type="tel" placeholder="+7 777 000 0000"></div>
+    <div class="form-group"><label class="form-label">Телефон родителей</label><input class="form-input" id="s-pphone" type="tel" placeholder="+7 777 000 0000"></div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-secondary" style="flex:1" onclick="closeModal('modal-student')">Отмена</button>
+      <button class="btn btn-primary" style="flex:1" onclick="saveStudent()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-status">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Статус посещения</div>
+    <div id="st-info" style="color:var(--text2);font-size:13px;margin-bottom:16px;font-weight:700"></div>
+    <div style="display:flex;flex-direction:column;gap:8px" id="st-opts"></div>
+    <button class="btn btn-secondary btn-block" style="margin-top:12px" onclick="closeModal('modal-status')">Отмена</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+let db=null,currentUser=null,userProfile=null;
+let groups=[],currentGroup=null,currentStudents=[];
+let currentStudent=null;
+let jMonth=new Date().getMonth(),jYear=new Date().getFullYear();
+let att={},pay={};
+let selDays=new Set();
+
+const DAYS=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+const MONTHS=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+const STATUSES=[
+  {key:'present',    emoji:'✅', label:'Пришёл',       cls:'present'},
+  {key:'absent',     emoji:'❌', label:'Не пришёл',    cls:'absent'},
+  {key:'excused',    emoji:'🕊️', label:'Уважительная', cls:'excused'},
+  {key:'sick',       emoji:'🤒', label:'Болезнь',      cls:'sick'},
+  {key:'competition',emoji:'🏆', label:'Соревнование', cls:'competition'},
+  {key:'wrongday',   emoji:'➖', label:'Не тот день',  cls:'wrongday'},
+];
+
+// Статусы которые считаются как ПРИСУТСТВИЕ (не портят статистику)
+const POSITIVE=['present','competition'];
+// Статусы которые считаются как ПРОПУСК
+const NEGATIVE=['absent','excused','sick'];
+// Статусы которые ИГНОРИРУЮТСЯ в статистике
+const IGNORED=['none','wrongday'];
+
+window.addEventListener('load',()=>{
+  const t=localStorage.getItem('tkd-theme')||'dark';
+  if(t==='light'){document.body.classList.add('light');document.getElementById('theme-btn').textContent='🌙';}
+  const url=localStorage.getItem('tkd-supa-url'),key=localStorage.getItem('tkd-supa-key');
+  if(url&&key)initSupa(url,key);
+});
+function initSupa(url,key){
+  try{
+    db=window.supabase.createClient(url,key,{auth:{persistSession:true,autoRefreshToken:true}});
+    document.getElementById('supabase-config').style.display='none';
+    checkAuth();
+  }catch(e){alert('Ошибка: '+e.message);}
+}
+function saveConfig(){
+  const url=document.getElementById('cfg-url').value.trim(),key=document.getElementById('cfg-key').value.trim();
+  if(!url||!key){showToast('Введите URL и ключ');return;}
+  localStorage.setItem('tkd-supa-url',url);localStorage.setItem('tkd-supa-key',key);
+  initSupa(url,key);
+}
+function resetConfig(){
+  localStorage.removeItem('tkd-supa-url');localStorage.removeItem('tkd-supa-key');
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('supabase-config').style.display='block';
+}
+async function checkAuth(){
+  const{data:{session}}=await db.auth.getSession();
+  if(session){currentUser=session.user;await loadProfile();}
+  else document.getElementById('auth-screen').style.display='flex';
+}
+async function loadProfile(){
+  const{data}=await db.from('profiles').select('*').eq('id',currentUser.id).single().catch(()=>({data:null}));
+  if(data&&data.first_name){userProfile=data;showApp();}
+  else{document.getElementById('auth-screen').style.display='none';document.getElementById('onboarding').style.display='flex';}
+}
+function showApp(){
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('onboarding').style.display='none';
+  document.getElementById('app').style.display='flex';
+  loadGroups();updateTimerUI();
+}
+function switchAuthTab(tab){
+  document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',(i===0&&tab==='login')||(i===1&&tab==='register')));
+  document.getElementById('auth-login').style.display=tab==='login'?'block':'none';
+  document.getElementById('auth-register').style.display=tab==='register'?'block':'none';
+}
+async function doLogin(){
+  const email=document.getElementById('login-email').value.trim(),pass=document.getElementById('login-pass').value;
+  if(!email||!pass){showToast('Заполните все поля');return;}
+  try{
+    const{data,error}=await db.auth.signInWithPassword({email,password:pass});
+    if(error){alert('Ошибка: '+error.message);return;}
+    currentUser=data.user;await loadProfile();
+  }catch(e){alert('Ошибка: '+e.message);}
+}
+async function doRegister(){
+  const fname=document.getElementById('reg-fname').value.trim(),lname=document.getElementById('reg-lname').value.trim();
+  const email=document.getElementById('reg-email').value.trim(),pass=document.getElementById('reg-pass').value;
+  if(!fname||!lname||!email||!pass){showToast('Заполните все поля');return;}
+  const{data,error}=await db.auth.signUp({email,password:pass});
+  if(error){alert('Ошибка: '+error.message);return;}
+  currentUser=data.user;
+  await db.from('profiles').upsert({id:currentUser.id,first_name:fname,last_name:lname});
+  await loadProfile();
+}
+async function doLogout(){
+  await db.auth.signOut();
+  document.getElementById('app').style.display='none';
+  document.getElementById('auth-screen').style.display='flex';
+  document.getElementById('fab').style.display='none';
+}
+async function saveProfile(){
+  const fname=document.getElementById('ob-fname').value.trim(),lname=document.getElementById('ob-lname').value.trim();
+  if(!fname||!lname){showToast('Введите имя и фамилию');return;}
+  await db.from('profiles').upsert({id:currentUser.id,first_name:fname,last_name:lname});
+  userProfile={id:currentUser.id,first_name:fname,last_name:lname};showApp();
+}
+async function updateProfile(){
+  const fname=document.getElementById('edit-fname').value.trim(),lname=document.getElementById('edit-lname').value.trim();
+  if(!fname||!lname){showToast('Заполните поля');return;}
+  await db.from('profiles').update({first_name:fname,last_name:lname}).eq('id',currentUser.id);
+  userProfile.first_name=fname;userProfile.last_name=lname;renderProfile();showToast('Профиль сохранён ✓');
+}
+function renderProfile(){
+  if(!userProfile)return;
+  document.getElementById('p-name').textContent=userProfile.first_name+' '+userProfile.last_name;
+  document.getElementById('edit-fname').value=userProfile.first_name||'';
+  document.getElementById('edit-lname').value=userProfile.last_name||'';
+  const av=document.getElementById('p-av');
+  if(userProfile.avatar_url)av.innerHTML=`<img src="${userProfile.avatar_url}">`;
+  else av.textContent=(userProfile.first_name[0]||'')+(userProfile.last_name[0]||'');
+  document.getElementById('st-g').textContent=groups.length;
+  document.getElementById('st-s').textContent=groups.reduce((a,g)=>a+(g._cnt||0),0);
+  document.getElementById('st-t').textContent=groups.filter(g=>g.days&&g.days.includes(new Date().getDay())).length;
+}
+async function handleAvatar(e){
+  const file=e.target.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=async ev=>{
+    await db.from('profiles').update({avatar_url:ev.target.result}).eq('id',currentUser.id);
+    userProfile.avatar_url=ev.target.result;renderProfile();showToast('Фото обновлено ✓');
+  };r.readAsDataURL(file);
+}
+
+async function loadGroups(){
+  const{data}=await db.from('groups').select('*').order('created_at');
+  if(!data)return;
+  for(const g of data){
+    const{count}=await db.from('students').select('id',{count:'exact',head:true}).eq('group_id',g.id);
+    g._cnt=count||0;
+  }
+  groups=data;renderGroupsList();renderProfile();
+}
+function renderGroupsList(){
+  const today=groups.filter(g=>g.days&&g.days.includes(new Date().getDay()));
+  document.getElementById('groups-hero').innerHTML=`<div class="hero">
+    <div class="hero-title">TORNADO TKD</div><div class="hero-sub">Журнал тренера</div>
+    <div class="hero-stats">
+      <div><div class="h-num">${groups.length}</div><div class="h-lbl">Групп</div></div>
+      <div><div class="h-num">${groups.reduce((a,g)=>a+(g._cnt||0),0)}</div><div class="h-lbl">Учеников</div></div>
+      <div><div class="h-num">${today.length}</div><div class="h-lbl">Сегодня</div></div>
+    </div></div>`;
+  const c=document.getElementById('groups-cont');
+  if(!groups.length){c.innerHTML=`<div class="empty-state"><div class="empty-icon">🥋</div><div class="empty-title">Нет групп</div><div class="empty-sub">Нажмите + чтобы создать первую</div></div>`;return;}
+  c.innerHTML=groups.map(g=>{
+    const pills=[1,2,3,4,5,6,0].map(d=>`<span class="dpill ${g.days&&g.days.includes(d)?'on':'off'}">${DAYS[d]}</span>`).join('');
+    return `<div class="group-card" onclick="openGroup('${g.id}')"><div class="gc-inner"><div><div class="g-name">${g.name}</div><div class="g-time">${g.time||''}</div><div>${pills}</div></div><div class="g-badge">${g._cnt} уч.</div></div></div>`;
+  }).join('');
+}
+
+async function openGroup(id){
+  currentGroup=groups.find(g=>g.id===id);
+  document.getElementById('view-list').style.display='none';
+  document.getElementById('view-detail').style.display='block';
+  document.getElementById('view-student').style.display='none';
+  document.getElementById('fab').style.display='none';
+  await loadStuAtt();renderDetail();
+}
+function showList(){
+  document.getElementById('view-list').style.display='block';
+  document.getElementById('view-detail').style.display='none';
+  document.getElementById('view-student').style.display='none';
+  document.getElementById('fab').style.display=currentTab==='groups'?'flex':'none';
+  loadGroups();
+}
+async function loadStuAtt(){
+  const{data:sts}=await db.from('students').select('*').eq('group_id',currentGroup.id).order('last_name');
+  currentStudents=sts||[];
+  if(!currentStudents.length){att={};pay={};return;}
+  const ids=currentStudents.map(s=>s.id);
+  const first=`${jYear}-${String(jMonth+1).padStart(2,'0')}-01`;
+  const last=`${jYear}-${String(jMonth+1).padStart(2,'0')}-${new Date(jYear,jMonth+1,0).getDate()}`;
+  const{data:ad}=await db.from('attendance').select('*').in('student_id',ids).gte('date',first).lte('date',last);
+  att={};(ad||[]).forEach(a=>{att[a.student_id+'_'+a.date]=a.status;});
+  const{data:pd}=await db.from('payments').select('*').in('student_id',ids);
+  pay={};(pd||[]).forEach(p=>{pay[p.student_id+'_'+p.year+'_'+p.month]=p.paid;});
+}
+function getDates(){
+  const dates=[],dim=new Date(jYear,jMonth+1,0).getDate();
+  for(let d=1;d<=dim;d++){const dow=new Date(jYear,jMonth,d).getDay();if(currentGroup.days&&currentGroup.days.includes(dow))dates.push(d);}
+  return dates;
+}
+
+// Подсчёт статистики ученика
+// present + competition = положительно
+// absent + excused + sick = пропуск
+// none + wrongday = игнорируется
+function calcStudentStats(s,dates){
+  let present=0,absent=0,competition=0,total=0;
+  dates.forEach(d=>{
+    const ds=`${jYear}-${String(jMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const st=att[s.id+'_'+ds]||'none';
+    if(IGNORED.includes(st))return;
+    total++;
+    if(st==='present')present++;
+    if(st==='competition')competition++;
+    if(NEGATIVE.includes(st))absent++;
+  });
+  const attended=present+competition;
+  const pct=total>0?Math.round(attended/total*100):0;
+  const hasCompetition=dates.some(d=>{
+    const ds=`${jYear}-${String(jMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    return att[s.id+'_'+ds]==='competition';
+  });
+  return{present,absent,competition,attended,total,pct,hasCompetition};
+}
+
+function buildAnalytics(dates){
+  if(!currentStudents.length)return'';
+  const stuStats=currentStudents.map(s=>({...s,...calcStudentStats(s,dates)}));
+  const avgPct=stuStats.filter(s=>s.total>0).length>0
+    ?Math.round(stuStats.filter(s=>s.total>0).reduce((a,s)=>a+s.pct,0)/stuStats.filter(s=>s.total>0).length):0;
+  const totalAbsent=stuStats.reduce((a,s)=>a+s.absent,0);
+  const paid=currentStudents.filter(s=>pay[s.id+'_'+jYear+'_'+jMonth]).length;
+  const byAbsent=[...stuStats].sort((a,b)=>b.absent-a.absent);
+  const byPct=[...stuStats].sort((a,b)=>b.pct-a.pct);
+  const barColor=pct=>pct>=80?'var(--green)':pct>=50?'var(--orange)':'var(--red)';
+
+  const ratingRows=byAbsent.filter(s=>s.absent>0).slice(0,5).map((s,i)=>{
+    const rc=i===0?'gold':i===1?'silver':i===2?'bronze':'';
+    const absPct=s.total>0?Math.round(s.absent/s.total*100):0;
+    return`<div class="rating-row">
+      <div class="r-rank ${rc}">${i+1}</div>
+      <div class="r-name">${s.last_name} ${s.first_name[0]}.</div>
+      <div class="r-bar-wrap"><div class="r-bar" style="width:${absPct}%;background:var(--red)"></div></div>
+      <div class="r-pct" style="color:var(--red)">${s.absent}</div>
+    </div>`;
+  }).join('');
+
+  const chartRows=byPct.map(s=>{
+    const isChampion=s.hasCompetition;
+    const nameStyle=isChampion?`style="color:var(--yellow);text-shadow:0 0 8px rgba(236,201,75,.7)"`:'';
+    const wrapStyle=isChampion?`style="border:1.5px solid rgba(236,201,75,.5);border-radius:7px;box-shadow:0 0 8px rgba(236,201,75,.2)"`:'';
+    const label=isChampion?`${s.pct}% 🏆`:`${s.pct}%`;
+    return`<div class="chart-row">
+      <div class="chart-name" ${nameStyle}>${s.last_name} ${s.first_name[0]}.</div>
+      <div class="chart-bar-wrap" ${wrapStyle}><div class="chart-bar" style="width:${s.pct||2}%;background:${isChampion?'linear-gradient(90deg,var(--orange),var(--yellow))':barColor(s.pct)}"><span>${label}</span></div></div>
+    </div>`;
+  }).join('');
+
+  return`<div style="margin-bottom:16px">
+    <div class="sec-title" style="margin-bottom:12px">Аналитика — ${MONTHS[jMonth]} ${jYear}</div>
+    <div class="analytics-cards">
+      <div class="an-card green"><div class="an-num">${avgPct}%</div><div class="an-lbl">Средняя посещ.</div></div>
+      <div class="an-card red"><div class="an-num">${totalAbsent}</div><div class="an-lbl">Всего пропусков</div></div>
+      <div class="an-card blue"><div class="an-num">${dates.length}</div><div class="an-lbl">Занятий в месяце</div></div>
+      <div class="an-card orange"><div class="an-num">${paid}/${currentStudents.length}</div><div class="an-lbl">Оплатили</div></div>
+    </div>
+    ${byAbsent.some(s=>s.absent>0)?`<div style="font-size:12px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Топ пропусков</div><div class="rating-list">${ratingRows}</div>`:''}
+    <div style="font-size:12px;font-weight:800;color:var(--text2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px">Посещаемость <span style="color:var(--yellow)">🏆 = был на соревновании</span></div>
+    <div class="attend-chart">${chartRows||'<div style="color:var(--text2);font-size:13px;text-align:center;padding:8px">Нет данных</div>'}</div>
+  </div>`;
+}
+
+function renderDetail(){
+  const g=currentGroup,dates=getDates();
+  const pills=[1,2,3,4,5,6,0].map(d=>`<span class="dpill ${g.days&&g.days.includes(d)?'on':'off'}">${DAYS[d]}</span>`).join('');
+  const analytics=buildAnalytics(dates);
+  let tableBody='';
+  if(!currentStudents.length){
+    tableBody=`<div class="empty-state" style="padding:28px 0"><div class="empty-icon">👤</div><div class="empty-title">Нет учеников</div><div class="empty-sub">Добавьте первого ученика</div></div>`;
+  }else{
+    const heads=dates.map(d=>`<th><div>${d}</div><div style="font-size:9px;opacity:.6">${DAYS[new Date(jYear,jMonth,d).getDay()]}</div></th>`).join('');
+    const rows=currentStudents.map(s=>{
+      const cells=dates.map(d=>{
+        const ds=`${jYear}-${String(jMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const stKey=att[s.id+'_'+ds]||'none';
+        const st=STATUSES.find(x=>x.key===stKey);
+        return`<td><button class="st-btn ${st?st.cls:''}" onclick="openStat('${s.id}','${ds}','${s.last_name} ${s.first_name}')">${st?st.emoji:'·'}</button></td>`;
+      }).join('');
+      const pk=s.id+'_'+jYear+'_'+jMonth,paid=pay[pk]||false;
+      const stats=calcStudentStats(s,dates);
+      return`<tr>
+        <td class="ntd" onclick="openStudent('${s.id}')">${s.last_name} ${s.first_name}<div style="font-size:10px;color:var(--text2)">${stats.attended}/${stats.total||dates.length}</div></td>
+        ${cells}
+        <td style="padding:4px 8px"><button class="pay-btn ${paid?'paid':'unpaid'}" onclick="togglePay('${s.id}',${jYear},${jMonth})">${paid?'✓ Опл.':'Не опл.'}</button></td>
+      </tr>`;
+    }).join('');
+    tableBody=`<div class="j-wrap"><table class="j-table"><thead><tr><th class="nth">Ученик</th>${heads}<th>Оплата</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+  }
+  document.getElementById('detail-cont').innerHTML=`
+    <div style="margin-bottom:16px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+        <div><div style="font-family:'Bebas Neue',cursive;font-size:28px;color:var(--red);letter-spacing:1px">${g.name}</div>
+        <div style="color:var(--red);font-weight:700;font-size:13px;margin:2px 0">${g.time||''}</div>
+        <div style="margin-top:4px">${pills}</div></div>
+        <button class="btn btn-secondary btn-sm" onclick="openEditGroup('${g.id}')">✏️ Изменить</button>
+      </div>
+    </div>
+    <div class="j-nav"><button class="icon-btn" onclick="changeMonth(-1)">‹</button><div class="month-lbl">${MONTHS[jMonth]} ${jYear}</div><button class="icon-btn" onclick="changeMonth(1)">›</button></div>
+    ${analytics}
+    ${tableBody}
+    <button class="btn btn-primary btn-block" style="margin-top:8px" onclick="openAddStudent()">+ Добавить ученика</button>
+    <button class="btn btn-danger btn-block" style="margin-top:8px" onclick="delGroup('${g.id}')">🗑 Удалить группу</button>`;
+}
+
+async function changeMonth(dir){
+  jMonth+=dir;if(jMonth>11){jMonth=0;jYear++;}if(jMonth<0){jMonth=11;jYear--;}
+  await loadStuAtt();renderDetail();
+}
+
+function openAddGroup(){
+  document.getElementById('mg-title').textContent='Новая группа';
+  document.getElementById('eg-id').value='';document.getElementById('g-name').value='';document.getElementById('g-time').value='18:00';
+  selDays.clear();document.querySelectorAll('.day-btn').forEach(b=>b.classList.remove('selected'));
+  openModal('modal-group');
+}
+function openEditGroup(id){
+  const g=groups.find(x=>x.id===id);
+  document.getElementById('mg-title').textContent='Изменить группу';
+  document.getElementById('eg-id').value=id;document.getElementById('g-name').value=g.name;document.getElementById('g-time').value=g.time||'18:00';
+  selDays=new Set(g.days||[]);
+  document.querySelectorAll('.day-btn').forEach(b=>b.classList.toggle('selected',selDays.has(parseInt(b.dataset.day))));
+  openModal('modal-group');
+}
+async function saveGroup(){
+  const name=document.getElementById('g-name').value.trim(),time=document.getElementById('g-time').value,eid=document.getElementById('eg-id').value;
+  if(!name){showToast('Введите название');return;}if(!selDays.size){showToast('Выберите дни');return;}
+  if(eid){await db.from('groups').update({name,time,days:[...selDays]}).eq('id',eid);showToast('Группа обновлена ✓');}
+  else{await db.from('groups').insert({name,time,days:[...selDays]});showToast('Группа создана ✓');}
+  closeModal('modal-group');await loadGroups();
+  if(eid){currentGroup=groups.find(g=>g.id===eid);await loadStuAtt();renderDetail();}
+}
+async function delGroup(id){
+  if(!confirm('Удалить группу и всех учеников?'))return;
+  await db.from('groups').delete().eq('id',id);showList();showToast('Группа удалена');
+}
+document.getElementById('days-picker').addEventListener('click',e=>{
+  const b=e.target.closest('.day-btn');if(!b)return;
+  const d=parseInt(b.dataset.day);
+  if(selDays.has(d)){selDays.delete(d);b.classList.remove('selected');}else{selDays.add(d);b.classList.add('selected');}
+});
+
+function openAddStudent(){
+  document.getElementById('ms-title').textContent='Добавить ученика';
+  document.getElementById('es-id').value='';
+  ['s-lname','s-fname','s-mname','s-iin','s-phone','s-pphone'].forEach(id=>document.getElementById(id).value='');
+  openModal('modal-student');
+}
+function openEditStudent(s){
+  document.getElementById('ms-title').textContent='Редактировать ученика';
+  document.getElementById('es-id').value=s.id;
+  document.getElementById('s-lname').value=s.last_name||'';document.getElementById('s-fname').value=s.first_name||'';
+  document.getElementById('s-mname').value=s.middle_name||'';document.getElementById('s-iin').value=s.iin||'';
+  document.getElementById('s-phone').value=s.phone||'';document.getElementById('s-pphone').value=s.parent_phone||'';
+  openModal('modal-student');
+}
+async function saveStudent(){
+  const lname=document.getElementById('s-lname').value.trim(),fname=document.getElementById('s-fname').value.trim();
+  const mname=document.getElementById('s-mname').value.trim(),iin=document.getElementById('s-iin').value.trim();
+  const phone=document.getElementById('s-phone').value.trim(),pphone=document.getElementById('s-pphone').value.trim();
+  const eid=document.getElementById('es-id').value;
+  if(!lname||!fname){showToast('Введите имя и фамилию');return;}
+  if(eid){await db.from('students').update({last_name:lname,first_name:fname,middle_name:mname,iin,phone,parent_phone:pphone}).eq('id',eid);showToast('Данные обновлены ✓');}
+  else{await db.from('students').insert({group_id:currentGroup.id,first_name:fname,last_name:lname,middle_name:mname,iin,phone,parent_phone:pphone});showToast('Ученик добавлен ✓');}
+  closeModal('modal-student');await loadStuAtt();
+  if(eid&&currentStudent)await openStudent(currentStudent.id);else renderDetail();
+}
+async function openStudent(id){
+  currentStudent=currentStudents.find(s=>s.id===id)||currentStudent;
+  if(!currentStudent||currentStudent.id!==id){const{data}=await db.from('students').select('*').eq('id',id).single();currentStudent=data;}
+  document.getElementById('view-detail').style.display='none';
+  document.getElementById('view-student').style.display='block';
+  const{data:ph}=await db.from('payments').select('*').eq('student_id',id).order('year').order('month');
+  const{data:ad}=await db.from('attendance').select('*').eq('student_id',id);
+  // All-time stats
+  let allPresent=0,allTotal=0;
+  (ad||[]).forEach(a=>{
+    if(IGNORED.includes(a.status))return;
+    allTotal++;
+    if(POSITIVE.includes(a.status))allPresent++;
+  });
+  const allPct=allTotal>0?Math.round(allPresent/allTotal*100):0;
+  const payH=(ph||[]).length===0?'<div style="color:var(--text2);font-size:13px">Нет данных</div>'
+    :(ph||[]).map(p=>`<button class="pay-chip ${p.paid?'paid':'unpaid'}" onclick="toggleStuPay('${p.student_id}',${p.year},${p.month})">${MONTHS[p.month].slice(0,3)} ${p.year} ${p.paid?'✓':'✗'}</button>`).join('');
+  const s=currentStudent;
+  document.getElementById('student-cont').innerHTML=`
+    <div class="card" style="margin-bottom:12px;background:linear-gradient(135deg,#1a0000,#2d0000 60%,#1a0a0a);border-color:rgba(229,62,62,.2)">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div class="s-av" style="width:56px;height:56px;font-size:20px">${(s.first_name[0]||'')+(s.last_name[0]||'')}</div>
+        <div style="flex:1">
+          <div style="font-family:'Bebas Neue',cursive;font-size:20px;color:#fff">${s.last_name} ${s.first_name} ${s.middle_name||''}</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.4)">${currentGroup.name}</div>
+          <div style="font-size:12px;color:var(--green);font-weight:700;margin-top:2px">✅ ${allPct}% посещаемость (${allPresent}/${allTotal})</div>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="openEditStudent(currentStudent)">✏️</button>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div class="sec-title" style="margin-bottom:12px">Данные</div>
+      <div class="info-row"><span class="info-lbl">ИИН</span><span class="info-val">${s.iin||'—'}</span></div>
+      <div class="info-row"><span class="info-lbl">Телефон</span><span class="info-val">${s.phone||'—'}</span></div>
+      <div class="info-row"><span class="info-lbl">Тел. родителей</span><span class="info-val">${s.parent_phone||'—'}</span></div>
+    </div>
+    <div class="card" style="margin-bottom:12px">
+      <div class="sec-title" style="margin-bottom:12px">История оплаты</div>
+      <div class="pay-chips">${payH}</div>
+    </div>
+    <button class="btn btn-danger btn-block" onclick="delStudent('${s.id}')">🗑 Удалить ученика</button>`;
+}
+function backToGroup(){
+  document.getElementById('view-detail').style.display='block';
+  document.getElementById('view-student').style.display='none';currentStudent=null;
+}
+async function toggleStuPay(sid,year,month){
+  const{data:ex}=await db.from('payments').select('*').eq('student_id',sid).eq('year',year).eq('month',month).maybeSingle();
+  await db.from('payments').upsert({student_id:sid,year,month,paid:!(ex?.paid||false)},{onConflict:'student_id,year,month'});
+  await openStudent(sid);
+}
+async function togglePay(sid,year,month){
+  const k=sid+'_'+year+'_'+month,nv=!(pay[k]||false);
+  await db.from('payments').upsert({student_id:sid,year,month,paid:nv},{onConflict:'student_id,year,month'});
+  pay[k]=nv;renderDetail();
+}
+async function delStudent(id){
+  if(!confirm('Удалить ученика?'))return;
+  await db.from('students').delete().eq('id',id);
+  showToast('Ученик удалён');backToGroup();await loadStuAtt();renderDetail();
+}
+
+let pendSt={};
+function openStat(sid,date,name){
+  pendSt={sid,date};
+  document.getElementById('st-info').textContent=name+' · '+date;
+  document.getElementById('st-opts').innerHTML=STATUSES.map(s=>
+    `<button class="btn btn-secondary" style="justify-content:flex-start;gap:12px" onclick="setStat('${s.key}')"><span style="font-size:20px">${s.emoji}</span><span>${s.label}</span></button>`
+  ).join('');
+  openModal('modal-status');
+}
+async function setStat(status){
+  const{sid,date}=pendSt;
+  await db.from('attendance').upsert({student_id:sid,date,status},{onConflict:'student_id,date'});
+  att[sid+'_'+date]=status;closeModal('modal-status');renderDetail();
+}
+
+let tSt={rounds:3,roundSec:120,breakSec:60};
+let tRun=false,tInt=null,tRound=0,tSec=0,tPh='idle';
+function adj(key,d){
+  if(tRun)return;
+  if(key==='rounds')tSt.rounds=Math.max(1,Math.min(20,tSt.rounds+d));
+  if(key==='roundSec')tSt.roundSec=Math.max(15,Math.min(600,tSt.roundSec+d));
+  if(key==='breakSec')tSt.breakSec=Math.max(15,Math.min(300,tSt.breakSec+d));
+  updateTimerUI();
+}
+function updateTimerUI(){
+  document.getElementById('tv-rounds').textContent=tSt.rounds;
+  document.getElementById('tv-rsec').textContent=tSt.roundSec+'с';
+  document.getElementById('tv-bsec').textContent=tSt.breakSec+'с';
+  document.getElementById('tv-rlbl').textContent=fmtL(tSt.roundSec);
+  document.getElementById('tv-blbl').textContent=fmtL(tSt.breakSec);
+  if(tPh==='idle'){
+    document.getElementById('t-time').textContent=fmt(tSt.roundSec);
+    document.getElementById('t-time').className='t-time';
+    document.getElementById('t-phase').textContent='ГОТОВ К БОЮ';
+    document.getElementById('t-phase').className='t-phase';
+    document.getElementById('t-rlbl').textContent=`${tSt.rounds} раундов · ${fmtL(tSt.roundSec)} / перерыв ${fmtL(tSt.breakSec)}`;
+    renderDots(-1,-1);
+  }
+}
+function fmt(s){return`${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;}
+function fmtL(s){const m=Math.floor(s/60),r=s%60;return m>0?`${m} мин ${r} сек`:`${r} сек`;}
+function renderDots(done,curr){
+  document.getElementById('rdots').innerHTML=Array.from({length:tSt.rounds},(_,i)=>{
+    let c='';if(i<done)c='done';else if(i===curr)c='curr';return`<div class="rdot ${c}"></div>`;
+  }).join('');
+}
+function toggleTimer(){
+  if(tPh==='done'){resetTimer();return;}
+  if(!tRun){
+    tRun=true;document.getElementById('t-start-btn').textContent='⏸ Пауза';
+    if(tPh==='idle'){tRound=0;tPh='round';tSec=tSt.roundSec;}
+    tInt=setInterval(tick,1000);
+  }else{tRun=false;clearInterval(tInt);document.getElementById('t-start-btn').textContent='▶ Продолжить';}
+}
+function tick(){
+  tSec--;
+  const te=document.getElementById('t-time'),pe=document.getElementById('t-phase'),re=document.getElementById('t-rlbl');
+  if(tPh==='round'){
+    te.textContent=fmt(tSec);te.className='t-time run';
+    pe.textContent=`РАУНД ${tRound+1}`;pe.className='t-phase';
+    re.textContent=`Раунд ${tRound+1} из ${tSt.rounds}`;renderDots(tRound,tRound);
+    if(tSec<=0){
+      beep('end');
+      if(tRound+1>=tSt.rounds){
+        tPh='done';tRun=false;clearInterval(tInt);
+        te.textContent='00:00';te.className='t-time';
+        pe.textContent='ФИНИШ 🏆';re.textContent='Все раунды завершены!';
+        renderDots(tSt.rounds,-1);document.getElementById('t-start-btn').textContent='↺ Заново';return;
+      }
+      tPh='break';tSec=tSt.breakSec;
+    }
+  }else if(tPh==='break'){
+    te.textContent=fmt(tSec);te.className='t-time brk';
+    pe.textContent='ПЕРЕРЫВ';pe.className='t-phase brk';
+    re.textContent=`Следующий: Раунд ${tRound+2}`;renderDots(tRound+1,-1);
+    if(tSec<=0){beep('start');tRound++;tPh='round';tSec=tSt.roundSec;}
+  }
+}
+function resetTimer(){tRun=false;clearInterval(tInt);tPh='idle';document.getElementById('t-start-btn').textContent='▶ Старт';updateTimerUI();}
+function beep(type){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const p=(f,s,d,w='sine')=>{const o=ctx.createOscillator(),g=ctx.createGain();o.connect(g);g.connect(ctx.destination);o.type=w;o.frequency.value=f;g.gain.setValueAtTime(.3,ctx.currentTime+s);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+s+d);o.start(ctx.currentTime+s);o.stop(ctx.currentTime+s+d);};
+    if(type==='end'){p(880,0,.4,'sawtooth');p(660,.1,.4,'sawtooth');p(440,.3,.5,'sawtooth');}
+    else{p(440,0,.3);p(660,.15,.4);}
+  }catch(e){}
+}
+
+let currentTab='groups';
+function switchTab(tab){
+  currentTab=tab;
+  document.querySelectorAll('.nav-item').forEach(el=>el.classList.toggle('active',el.dataset.tab===tab));
+  document.querySelectorAll('.screen').forEach(el=>el.classList.toggle('active',el.id==='screen-'+tab));
+  const titles={groups:'TORNADO TKD',timer:'ТАЙМЕР',profile:'ПРОФИЛЬ'};
+  document.getElementById('topbar-title').textContent=titles[tab];
+  const isList=tab==='groups'&&document.getElementById('view-list').style.display!=='none';
+  document.getElementById('fab').style.display=isList?'flex':'none';
+  if(tab==='profile')renderProfile();
+}
+function openModal(id){document.getElementById(id).classList.add('open');document.body.style.overflow='hidden';}
+function closeModal(id){document.getElementById(id).classList.remove('open');document.body.style.overflow='';}
+document.querySelectorAll('.modal-overlay').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)closeModal(el.id);}));
+function toggleTheme(){
+  const l=document.body.classList.toggle('light');
+  localStorage.setItem('tkd-theme',l?'light':'dark');
+  document.getElementById('theme-btn').textContent=l?'🌙':'☀️';
+}
+let toastT;
+function showToast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2500);
+}
+</script>
+</body>
+</html>
